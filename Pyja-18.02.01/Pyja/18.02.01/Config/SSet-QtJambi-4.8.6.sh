@@ -1,0 +1,9 @@
+export SC_QTJ_HM=/LITO/LINE/QtJambi/4.8.6/macOS/x64
+export SC_QTJ_LIB_PN=$SC_QTJ_HM/qtjambi-native-macosx-gcc-4.8.6/lib
+export SC_QTJ_PLUGIN_PN=$SC_QTJ_HM/qtjambi-native-macosx-gcc-4.8.6/plugins
+export SC_QTJ_JAR_FN=$SC_QTJ_HM/qtjambi-4.8.6.jar
+export SC_QTJ_ALL_JARS="$SC_QTJ_HM/qtjambi-util.jar"
+export SC_QTJ_ALL_JARS=$SC_QTJ_ALL_JARS:"$SC_QTJ_HM/qtjambi-examples-src.jar"
+export SC_QTJ_ALL_JARS=$SC_QTJ_ALL_JARS:"$SC_QTJ_HM/qtjambi-examples-4.8.6.jar"
+export SC_QTJ_ALL_JARS=$SC_QTJ_ALL_JARS:"$SC_QTJ_HM/qtjambi-designer-4.8.6.jar"
+export SC_QTJ_ALL_JARS=$SC_QTJ_ALL_JARS:"$SC_QTJ_JAR_FN"

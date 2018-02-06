@@ -1,0 +1,4 @@
+SET SC_J8_HM=C:\Program Files\Java\jdk1.8.0_162
+SET SC_J8_X_FN=%SC_J8_HM%\bin\java
+SET SC_J8C_X_FN=%SC_J8_HM%\bin\javac
+SET SC_J8R_X_FN=%SC_J8_HM%\bin\jar
