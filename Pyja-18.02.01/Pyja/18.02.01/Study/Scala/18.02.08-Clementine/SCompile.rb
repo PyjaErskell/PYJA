@@ -340,16 +340,6 @@ class CgAt < Java::AkkaActor::AbstractActor # (a)c(t)or
     nu_sender_atr = if x_sender_atr.nil? then get_self else x_sender_atr end
     x_target_atr .tell x_letter, nu_sender_atr
   end
-  def ym_qt_slot &x_block
-    mu_it = gy_gr_call "gf_qs#{x_block.arity}", x_block
-    ( @cu_qs_llos ||= [] ) << mu_it
-    return mu_it
-  end
-end
-def gf_qt_slot &x_block
-  fu_it = gy_gr_call "gf_qs#{x_block.arity}", x_block
-  ( $__gau_qs_llos ||= [] ) << fu_it
-  return fu_it
 end
 
 #
