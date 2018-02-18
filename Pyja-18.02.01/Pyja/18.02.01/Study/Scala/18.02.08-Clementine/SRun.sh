@@ -12,7 +12,7 @@ export SC_PYJA_RT="$( cd "$SC_PYJA_HM/.." && pwd )"
 export SC_PYJA_NM="$( basename "${SC_PYJA_RT}" )"
 
 source "$SC_PYJA_HM/Config/SSet-JDK-8.sh"
-source "$SC_PYJA_HM/Config/SSet-Python-3.6.3.sh"
+source "$SC_PYJA_HM/Config/SSet-Python-3.6.4.sh"
 
 export JAVA_HOME=$SC_J8_HM
 export SC_JAVA_XMX=-Xmx9g
