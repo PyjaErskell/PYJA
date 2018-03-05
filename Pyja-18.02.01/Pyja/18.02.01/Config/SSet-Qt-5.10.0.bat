@@ -1,0 +1,2 @@
+SET SC_QT_HM=C:\QUCK\Qt\5.10.0\5.10.0\msvc2017_64
+SET SC_QM_X_FN=%SC_QT_HM%\bin\qmake
