@@ -15,9 +15,15 @@
 #include <QWidget>
 
 #define AC_QAPP (*qApp)
+#define AC_IGNORE true
 
 #define CgQS QString
 #define CgQSn QString::number
+
+#define __aaf_join_sym( x_sym1, x_sym2 ) x_sym1##x_sym2
+#define af_join_sym( x_sym1, x_sym2 ) __aaf_join_sym( x_sym1, x_sym2 )
+#define af_ln_nm(x_px) af_join_sym ( x_px, __LINE__ )
+#define af_ af_ln_nm (_)
 
 #define at_ca const auto
 #define at_ct(x_cls) const x_cls * const
@@ -72,12 +78,43 @@ namespace Global {
   auto gf_os_env ( const CgQS & xr_nm ) { return qEnvironmentVariable ( af_qc (xr_nm) ); }
   auto gf_str_is_valid_date ( const CgQS & xr_str, const CgQS & xr_format ) { return QDateTime::fromString ( xr_str, xr_format ) .isValid (); }
 
+  auto __gaf_banner ( const int x_leading_space = 0, const int x_margin_inside = 2 ) {
+    const QStringList fu_msgs = {
+      CgQS ( "%1 %2" ) .arg ( GC_PYJA_NM, GC_APP_NM ),
+      "",
+      CgQS ( "ran on %1" ) .arg ( GC_ST .toString ( "yyyy-MM-dd HH:mm:ss" ) ),
+      "released under the GNU AGPL v3, see <http://www.gnu.org/licenses/>.",
+    };
+    at_ca fu_msl = fu_msgs .at ( std::distance (
+      fu_msgs .begin (),
+      std::max_element (
+        fu_msgs .begin (), fu_msgs .end (), 
+        [] ( at_ca & xr2_s1, at_ca & xr2_s2 ) { return xr2_s1 .size () < xr2_s2 .size (); }
+      )
+    ) ) .size (); // max string length
+    at_ca fu_ls = x_leading_space; // leading space before box
+    at_ca fu_mg = x_margin_inside; // margin inside box
+    at_ca fu_ll = fu_mg + fu_msl + fu_mg; // line length inside box
+    at_ca ff2_get_line = [&] () { return CgQS (' ') .repeated (fu_ls) + '+' + CgQS ('-') .repeated (fu_ll) + '+'; }; // ff2 -> (f)unction inside (f)unction nested level (2)
+    at_ca ff2_get_string = [&] ( const CgQS & xr2_str ) {
+      at_ca fu2_sl = xr2_str .size (); // string lentgh
+      at_ca fu2_lm = (int) ( ( fu_ll - fu2_sl ) / 2.0 ); // left margin inside box
+      at_ca fu2_rm = fu_ll - ( fu2_sl + fu2_lm ); // right margin inside box
+      return CgQS (' ') .repeated (fu_ls) + ':' + CgQS (' ') .repeated (fu2_lm) + xr2_str + CgQS (' ') .repeated (fu2_rm) + ':';
+    };
+    at_ca fu_r = [&] () {
+      auto fv2_r = QStringList ( ff2_get_line () );
+      std::transform ( fu_msgs .begin (), fu_msgs .end (), std::back_inserter (fv2_r), [&] ( at_ca & xr3_it ) { return ff2_get_string (xr3_it); } );
+      fv2_r << ff2_get_line ();
+      return fv2_r;
+    } ();
+    return fu_r;
+  }
+
   QTextStream __gal_stdout (stdout);
   auto * gf_stdout () { return & __gal_stdout; }
   #define AC_STDOUT ( * gf_stdout () )
 
-  QMessageLogger * __gatl_log = nullptr;
-  #define AC_LOG (*__gatl_log)
   auto __gav_log_lvl = QtDebugMsg;
   const CgQS __gau_log_lvl_hd [] = { "D", "W", "C", "F", "I" };
   void __gap_log_msg_handler ( const QtMsgType x_type, const QMessageLogContext &, const CgQS & xr_msg ) {
@@ -85,10 +122,13 @@ namespace Global {
     at_ca pu_dt = QDateTime::currentDateTime () .toString ("yyMMdd-hhmmss");
     __gal_stdout << CgQS ( "[%1,%2,%3] %4" ) .arg ( CgQSn (GC_THIS_PID) .rightJustified ( 4, '0' ), __gau_log_lvl_hd [x_type], pu_dt, xr_msg ) << endl;
   }
-  void __gap_log_init () {
+  auto * __gatl_log = [] () {
     qInstallMessageHandler (__gap_log_msg_handler);
-    __gatl_log = new QMessageLogger ( __FILE__, __LINE__, Q_FUNC_INFO );
-  }
+    AC_STDOUT << __gaf_banner () .join ('\n') << endl;
+    return new QMessageLogger ( __FILE__, __LINE__, Q_FUNC_INFO );
+  } ();
+  auto * gf_log () { return __gatl_log; }
+  #define AC_LOG ( * gf_log () )
   void gp_set_log_level_to_info () { __gav_log_lvl = QtInfoMsg; }
   void gp_set_log_level_to_debug () { __gav_log_lvl = QtDebugMsg; }
   typedef void (QMessageLogger::*TgtMLn) ( const char *, ... ) const;
@@ -220,12 +260,11 @@ namespace Global {
     }
   }
   void gp_request_exit ( const int x_ec, const QStringList & xr_ex ) { __DgExit::dp_it ( x_ec, xr_ex ); }
-  void __gap_signal_handler ( int xl_sig_num ) { gp_request_exit ( xl_sig_num, { CgQS ( "Interrupt signal (%1) received !!!" ) .arg ( CgQSn (xl_sig_num) ) } ); }
 
-  void gp_init () {
-    __gap_log_init ();
-    signal ( SIGINT, __gap_signal_handler );
-  }
+  auto af_ = [] {
+    signal ( SIGINT, [] ( int xl_sig_num ) { gp_request_exit ( xl_sig_num, { CgQS ( "Interrupt signal (%1) received !!!" ) .arg ( CgQSn (xl_sig_num) ) } ); } );
+    return AC_IGNORE;
+  } ();
 }
 
 //
@@ -238,43 +277,7 @@ namespace DBody { int df_it (); }
 namespace DRun {
   auto __dav_ec = GC_EC_NONE;
   auto __dav_ex = QStringList ();
-  auto __daf_banner ( const int x_leading_space = 0, const int x_margin_inside = 2 ) {
-    const QStringList fu_msgs = {
-      CgQS ( "%1 %2" ) .arg ( GC_PYJA_NM, GC_APP_NM ),
-      "",
-      CgQS ( "ran on %1" ) .arg ( GC_ST .toString ( "yyyy-MM-dd HH:mm:ss" ) ),
-      "released under the GNU AGPL v3, see <http://www.gnu.org/licenses/>.",
-    };
-    at_ca fu_msl = fu_msgs .at ( std::distance (
-      fu_msgs .begin (),
-      std::max_element (
-        fu_msgs .begin (), fu_msgs .end (), 
-        [] ( at_ca & xr2_s1, at_ca & xr2_s2 ) { return xr2_s1 .size () < xr2_s2 .size (); }
-      )
-    ) ) .size (); // max string length
-    at_ca fu_ls = x_leading_space; // leading space before box
-    at_ca fu_mg = x_margin_inside; // margin inside box
-    at_ca fu_ll = fu_mg + fu_msl + fu_mg; // line length inside box
-    at_ca ff2_get_line = [=] () { return CgQS (' ') .repeated (fu_ls) + '+' + CgQS ('-') .repeated (fu_ll) + '+'; }; // ff2 -> (f)unction inside (f)unction nested level (2)
-    at_ca ff2_get_string = [=] ( const CgQS & xr2_str ) {
-      at_ca fu2_sl = xr2_str .size (); // string lentgh
-      at_ca fu2_lm = (int) ( ( fu_ll - fu2_sl ) / 2.0 ); // left margin inside box
-      at_ca fu2_rm = fu_ll - ( fu2_sl + fu2_lm ); // right margin inside box
-      return CgQS (' ') .repeated (fu_ls) + ':' + CgQS (' ') .repeated (fu2_lm) + xr2_str + CgQS (' ') .repeated (fu2_rm) + ':';
-    };
-    at_ca fu_r = [=] () {
-      auto fv2_r = QStringList ( ff2_get_line () );
-      std::transform (
-        fu_msgs .begin (), fu_msgs .end (), std::back_inserter (fv2_r),
-        [ff2_get_string] ( at_ca & xr3_it ) { return ff2_get_string (xr3_it); }
-      );
-      fv2_r << ff2_get_line ();
-      return fv2_r;
-    } ();
-    return fu_r;
-  }
   void __dap_begin () {
-    AC_STDOUT << __daf_banner () .join ('\n') << endl;
     AC_LOG .debug ( "Pyja name => %s" , af_qc (GC_PYJA_NM) );
     if ( GC_PYJA_NM != gf_os_env ("SC_PYJA_NM") ) { ap_throw ( "Invalid Pyja name" ); }
     AC_LOG .debug ( "Pyja creation date => %s" , af_qc (GC_PYJA_CD) );
@@ -346,8 +349,5 @@ namespace OStart {
 
 int main ( int xl_argc, char * xtl_argv [] ) {
   const QApplication fu_app ( xl_argc, xtl_argv );
-  gp_init ();
   OStart::main ();
 }
-
-
