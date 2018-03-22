@@ -121,17 +121,14 @@ namespace Global {
   void __gap_log_msg_handler ( at_c(QtMsgType) x_type, at_cr(QMessageLogContext), at_cr(CgQS) xr_msg ) {
     if ( __gav_log_lvl == QtInfoMsg && x_type == QtDebugMsg ) return;
     at_ca pu_dt = QDateTime::currentDateTime () .toString ("yyMMdd-hhmmss");
-    __gal_stdout << CgQS ( "[%1,%2,%3] %4" ) .arg ( CgQSn (GC_THIS_PID) .rightJustified ( 4, '0' ), __gau_log_lvl_hd [x_type], pu_dt, xr_msg ) << endl;
+    __gal_stdout << CgQS ( "[%1,%2,%3] %4" ) .arg ( CgQSn (GC_THIS_PID) .rightJustified ( 6, '0' ), __gau_log_lvl_hd [x_type], pu_dt, xr_msg ) << endl;
   }
   auto * __gatl_log = [] () {
     qInstallMessageHandler (__gap_log_msg_handler);
-    AC_STDOUT << __gaf_banner () .join ('\n') << endl;
     return new QMessageLogger ( __FILE__, __LINE__, Q_FUNC_INFO );
   } ();
   auto * gf_log () { return __gatl_log; }
   #define AC_LOG ( * gf_log () )
-  void gp_set_log_level_to_info () { __gav_log_lvl = QtInfoMsg; }
-  void gp_set_log_level_to_debug () { __gav_log_lvl = QtDebugMsg; }
   typedef void (QMessageLogger::*TgtMLn) ( at_ct(char), ... ) const;
   TgtMLn gtl_debug    = & QMessageLogger::debug;
   TgtMLn gtl_warning  = & QMessageLogger::warning;
@@ -139,27 +136,27 @@ namespace Global {
   TgtMLn gtl_fatal    = & QMessageLogger::fatal;
   TgtMLn gtl_info     = & QMessageLogger::info;
   void gp_log_array ( at_ct(QMessageLogger) xt_ml, TgtMLn xtl_out, at_cr(CgQS) xr_title, at_cr(QStringList) xr_lst ) {
-    #define p_ap_out ( xt_ml ->*xtl_out )
-    if ( ! xr_title .isEmpty () ) { p_ap_out ( "%s :", af_qc (xr_title) ); }
+    #define ap2_out ( xt_ml ->*xtl_out )
+    if ( ! xr_title .isEmpty () ) { ap2_out ( "%s :", af_qc (xr_title) ); }
     for ( auto bl2_idx = 0; bl2_idx < xr_lst .size (); ++bl2_idx ) {
-      p_ap_out ( "  %2d => %s", bl2_idx+1, af_qc ( xr_lst .at (bl2_idx) ) );
+      ap2_out ( "  %2d => %s", bl2_idx+1, af_qc ( xr_lst .at (bl2_idx) ) );
     }
-    #undef p_ap_out
+    #undef ap2_out
   }
   void gp_log_array ( at_cr(CgQS) xr_title, at_cr(QStringList) xr_msgs ) { gp_log_array ( & AC_LOG, gtl_info, xr_title, xr_msgs ); }
   void gp_log_header ( at_ct(QMessageLogger) xt_ml, TgtMLn xtl_out, at_cr(CgQS) xr_header, at_c(int) x_line_width = 60 ) {
-    #define p_ap_out ( xt_ml ->*xtl_out )
+    #define ap2_out ( xt_ml ->*xtl_out )
     at_ca pu_ln = std::string ( x_line_width, '-' );
-    p_ap_out ( "+%s",  af_c  (pu_ln) );
-    p_ap_out ( ": %s", af_qc (xr_header) );
-    p_ap_out ( "+%s",  af_c  (pu_ln) );
-    #undef p_ap_out
+    ap2_out ( "+%s",  af_c  (pu_ln) );
+    ap2_out ( ": %s", af_qc (xr_header) );
+    ap2_out ( "+%s",  af_c  (pu_ln) );
+    #undef ap2_out
   }
   void gp_log_exception ( at_ct(QMessageLogger) xt_ml, TgtMLn xtl_out, at_cr(CgQS) xr_title, at_cr(QStringList) xr_ex ) {
-    #define p_ap_out ( xt_ml ->*xtl_out )
+    #define ap2_out ( xt_ml ->*xtl_out )
     gp_log_header ( xt_ml, xtl_out, xr_title );
-    foreach ( at_ca & br2_it, xr_ex ) { p_ap_out ( af_qc (br2_it) ); }
-    #undef p_ap_out
+    foreach ( at_ca & br2_it, xr_ex ) { ap2_out ( af_qc (br2_it) ); }
+    #undef ap2_out
   }
 
   auto gf_wd () { return QDir::currentPath (); } // current (w)orking (d)irectory
@@ -262,13 +259,13 @@ namespace Global {
       }
     }
   }
+
   void gp_request_exit ( at_c(int) x_ec, at_cr(QStringList) xr_ex ) { __DgExit::dp_it ( x_ec, xr_ex ); }
 
   #define ap_xi( x_expr, x_cond, x_err_msg ) if ( x_expr x_cond ) { gp_request_exit ( GC_EC_ERROR, { x_err_msg } ); } 
   #define ap_br(x_block) auto af_ = [] { x_block; return AC_IGNORE; } ()
-  #define ay_br(x_block) [&] { x_block } ()
-
-  ap_br ( signal ( SIGINT, [] ( int xl_sig_num ) { gp_request_exit ( xl_sig_num, { CgQS ( "Interrupt signal (%1) received !!!" ) .arg ( CgQSn (xl_sig_num) ) } ); } ); );
+  #define ay_b(x_block) [&] { x_block }
+  #define ay_br(x_block) ay_b(x_block) ()
 
   JNIEnv * __jatl_jnv = nullptr;
   JavaVM * __jatl_jvm = nullptr;
@@ -288,19 +285,21 @@ namespace Global {
 
   #define zy(x_it) jf_jnv () ->x_it
 
-  auto jf_qs ( at_c(jstring) x_jstr ) { // get Qt string from jstring
+  at_ca CjObject = zy ( FindClass("java/lang/Object") );
+  at_ca CjClass  = zy ( FindClass("java/lang/Class") );
+
+  auto jf_s ( at_c(jobject) x_jstr ) { // get string from jstring
     jboolean fv_is_copy = false;
-    at_ct(char) ft_utf = zy ( GetStringUTFChars ( x_jstr, & fv_is_copy ) );
+    at_ct(char) ft_utf = zy ( GetStringUTFChars ( (jstring) x_jstr, & fv_is_copy ) );
     at_ca fu_qstr = CgQS (ft_utf);
-    zy ( ReleaseStringUTFChars ( x_jstr, ft_utf ) );
+    zy ( ReleaseStringUTFChars ( (jstring) x_jstr, ft_utf ) );
     return fu_qstr;
   }
-  #define zf_qs(x_joj) jf_qs ( (jstring) x_joj )
 
   template < typename T >
-  auto jf_o2s ( at_cr(T) xr_it ) { // Java object to string
-    at_ca fu_mi_2str = zy ( GetMethodID ( zy ( FindClass("java/lang/Object") ), "toString", "()Ljava/lang/String;" ) );
-    return zf_qs ( zy ( CallObjectMethod ( xr_it, fu_mi_2str ) ) );
+  auto jf_o2s ( at_cr(T) xr_oj ) { // Java object to string
+    at_ca fu_mi_2str = zy ( GetMethodID ( CjObject, "toString", "()Ljava/lang/String;" ) );
+    return jf_s ( zy ( CallObjectMethod ( xr_oj, fu_mi_2str ) ) );
   }
 
   void jp_xie () { // e(x)it (i)f (e)xception occurred
@@ -314,16 +313,8 @@ namespace Global {
   #define zp_xie(x_it) zy (x_it), jp_xie ()
 
   auto jf_ns ( at_cr(CgQS) xr_qstr ) { return zf_xie ( NewStringUTF ( af_qc (xr_qstr) ) ); } // (n)ew (s)tring
-  auto jf_ns ( at_ct(char) xt_str  ) { return zf_xie ( NewStringUTF (xt_str) ); }
-
   auto jf_fc ( at_cr(CgQS) xr_cls_nm ) { return zf_xie ( FindClass ( af_qc (xr_cls_nm) ) ); } // (f)ind (c)lass
-  auto jf_fc ( at_ct(char) xt_cls_nm ) { return zf_xie ( FindClass (xt_cls_nm) ); }
-
   auto jf_mi ( at_c(jclass) x_cls, at_cr(CgQS) xr_nm, at_cr(CgQS) xr_sig ) { return zf_xie ( GetMethodID ( x_cls, af_qc (xr_nm), af_qc (xr_sig) ) ); } // (m)ethod (i)d
-  auto jf_mi ( at_c(jclass) x_cls, at_ct(char) xt_nm, at_cr(CgQS) xr_sig ) { return zf_xie ( GetMethodID ( x_cls,        xt_nm , af_qc (xr_sig) ) ); }
-  auto jf_mi ( at_c(jclass) x_cls, at_cr(CgQS) xr_nm, at_ct(char) xt_sig ) { return zf_xie ( GetMethodID ( x_cls, af_qc (xr_nm),        xt_sig  ) ); }
-  auto jf_mi ( at_c(jclass) x_cls, at_ct(char) xt_nm, at_ct(char) xt_sig ) { return zf_xie ( GetMethodID ( x_cls,        xt_nm ,        xt_sig  ) ); }
-
   auto jf_no ( at_c(jclass) x_cls, at_c(jmethodID) x_mi, ... ) { // (n)ew (o)bject
     va_list fl_args;
     va_start ( fl_args, x_mi );
@@ -331,13 +322,11 @@ namespace Global {
     va_end (fl_args);
     return fu_oj;
   }
-
   auto jf_noa ( at_c(jclass) x_cls, at_cr(QList<jobject>) xr_lst ) { // (n)ew (o)bject (a)rray
     at_ca fu_oa = zf_xie ( NewObjectArray ( xr_lst .size (), x_cls, NULL ) );
     for ( auto bl2_idx = 0; bl2_idx < xr_lst .size (); ++bl2_idx ) { zp_xie ( SetObjectArrayElement ( fu_oa, bl2_idx, xr_lst .at (bl2_idx) ) ); }
     return fu_oa;
   }
-
   auto jf_om ( at_c(jobject) x_oj, at_c(jmethodID) x_mi, ... ) { // call (o)bject (m)ethod
     va_list fl_args;
     va_start ( fl_args, x_mi );
@@ -351,7 +340,6 @@ namespace Global {
     zp_xie ( CallObjectMethodV ( x_oj, x_mi, pl_args ) );
     va_end (pl_args);
   }
-
   auto jf_sm ( at_c(jclass) x_cls, at_c(jmethodID) x_si, ... ) { // call (s)tatic object (m)ethod
     va_list fl_args;
     va_start ( fl_args, x_si );
@@ -365,22 +353,8 @@ namespace Global {
     zp_xie ( CallStaticObjectMethodV ( x_cls, x_si, pl_args ) );
     va_end (pl_args);
   }
-
   auto jf_si ( at_c(jclass) x_cls, at_cr(CgQS) xr_nm, at_cr(CgQS) xr_sig ) { return zf_xie ( GetStaticMethodID ( x_cls, af_qc (xr_nm), af_qc (xr_sig) ) ); } // (s)tatic method (i)d
-  auto jf_si ( at_c(jclass) x_cls, at_ct(char) xt_nm, at_cr(CgQS) xr_sig ) { return zf_xie ( GetStaticMethodID ( x_cls,        xt_nm , af_qc (xr_sig) ) ); }
-  auto jf_si ( at_c(jclass) x_cls, at_cr(CgQS) xr_nm, at_ct(char) xt_sig ) { return zf_xie ( GetStaticMethodID ( x_cls, af_qc (xr_nm),        xt_sig  ) ); }
-  auto jf_si ( at_c(jclass) x_cls, at_ct(char) xt_nm, at_ct(char) xt_sig ) { return zf_xie ( GetStaticMethodID ( x_cls,        xt_nm ,        xt_sig  ) ); }
-
   void jp_add_jar ( at_cr(CgQS) xr_jar_fn ) {
-    // Scala code
-    // def gp_add_jar ( x_fn : String ) {
-    //   if ( ! gf_if (x_fn) ) throw new java.io.FileNotFoundException ( s"Can't find jar file => ${x_fn}" )
-    //   val pu_url = new java.io.File (x_fn) .toURI () .toURL ()
-    //   val pu_cl = ClassLoader .getSystemClassLoader .asInstanceOf [java.net.URLClassLoader]
-    //   val pu_m = classOf [java.net.URLClassLoader] .getDeclaredMethod ( "addURL", classOf [java.net.URL] )
-    //   pu_m .setAccessible (true)
-    //   pu_m .invoke ( pu_cl, pu_url )
-    // }
     ap_xi ( gf_if (xr_jar_fn), != true, af_w ( "Can't find jar file => %1" ) .arg (xr_jar_fn) );
     at_ca pu_cls_file = jf_fc ("java/io/File");
     at_ca pu_cls_cl = jf_fc ("java/lang/ClassLoader");
@@ -394,9 +368,9 @@ namespace Global {
     at_ca pu_cl = jf_sm ( pu_cls_cl, jf_si ( pu_cls_cl, "getSystemClassLoader", "()Ljava/lang/ClassLoader;" ) );
     at_ca pu_m = jf_om (
       jf_fc ("java/net/URLClassLoader"),
-      jf_mi ( jf_fc ("java/lang/Class"), "getDeclaredMethod", "(Ljava/lang/String;[Ljava/lang/Class;)Ljava/lang/reflect/Method;" ),
+      jf_mi ( CjClass, "getDeclaredMethod", "(Ljava/lang/String;[Ljava/lang/Class;)Ljava/lang/reflect/Method;" ),
       jf_ns ("addURL"),
-      jf_noa ( jf_fc ("java/lang/Class"), { jf_fc ("java/net/URL") } )
+      jf_noa ( CjClass, { jf_fc ("java/net/URL") } )
     );
     jp_on (
       pu_m,
@@ -407,22 +381,22 @@ namespace Global {
       pu_m,
       jf_mi ( jf_fc ("java/lang/reflect/Method"), "invoke", "(Ljava/lang/Object;[Ljava/lang/Object;)Ljava/lang/Object;" ),
       pu_cl,
-      jf_noa ( jf_fc ("java/lang/Object"), {pu_url} )
+      jf_noa ( CjObject, {pu_url} )
     );
+  }
+
+  auto jf_i ( at_c(jobject) x_it ) {
+    static at_ca ysu_cls = jf_fc ("java/lang/Integer");
+    return zf_xie ( CallIntMethod ( x_it, jf_mi ( ysu_cls, "intValue", "()I" ) ) );
   }
 
   ap_br (
     foreach ( at_cr(CgQS) br2_jar_fn, QStringList ({
-      gf_pj ({ GC_PYJA_HM, "Library", "AppDirs", "1.0.0", "appdirs-1.0.0.jar" }),
       gf_pj ({ GC_PYJA_HM, "Library", "Groovy", "2.4.14", "embeddable", "groovy-all-2.4.14-indy.jar" }),
-      gf_pj ({ GC_PYJA_HM, "Library", "JNA", "4.5.1", "jna-4.5.1.jar" }),
-      gf_pj ({ GC_PYJA_HM, "Library", "JNA", "4.5.1", "jna-platform-4.5.1.jar" }),
-      gf_pj ({ GC_PYJA_HM, "Library", "SLF4J", "1.7.25", "slf4j-api-1.7.25.jar" }),
-      gf_pj ({ GC_PYJA_HM, "Library", "SLF4J", "1.7.25", "slf4j-nop-1.7.25.jar" }),
     }) ) { jp_add_jar (br2_jar_fn); }
   );
 
-  auto jf_se ( at_cr(CgQS) xr_ngin_nm ) { // (s)cript (e)ngine
+  auto jf_script_engine ( at_cr(CgQS) xr_ngin_nm ) { // (s)cript (e)ngine
     at_ca fu_cls_sem = jf_fc ("javax/script/ScriptEngineManager");
     return jf_om (
       jf_no ( fu_cls_sem, jf_mi ( fu_cls_sem, "<init>", "()V" ) ),
@@ -430,28 +404,31 @@ namespace Global {
       jf_ns (xr_ngin_nm)
     );
   }
-
-  at_ca GC_GR = jf_se ("Groovy");
-
-  auto jy_se_eval ( at_cr(jobject) xr_se, at_ct(char) xt_script_str ) {
+  at_ca GC_GR = jf_script_engine ("Groovy");
+  auto jy_se ( at_cr(jobject) xr_se, at_cr(CgQS) xr_script ) { // (s)cript (e)val
     return jf_om (
       xr_se,
       jf_mi ( jf_fc ("javax/script/ScriptEngine"), "eval", "(Ljava/lang/String;)Ljava/lang/Object;" ),
-      jf_ns (xt_script_str)
+      jf_ns (xr_script )
     );
   }
-  auto jy_se_eval ( at_cr(jobject) xr_se, at_cr(CgQS) xr_str ) { return jy_se_eval ( xr_se, af_qc (xr_str) ); }
-  auto jy_ge ( at_ct(char) xt_str ) { return jy_se_eval ( GC_GR, xt_str ); } // (g)roovy (e)val
-  auto jy_ge ( at_cr(CgQS) xr_str ) { return jy_ge ( af_qc (xr_str) ); }
+  auto jy_ge ( at_cr(CgQS) xr_str ) { return jy_se ( GC_GR, xr_str ); } // (g)roovy (e)val
 
-  at_ca GC_GROOVY_VR = zf_qs ( jy_ge ( "GroovySystem.version" ) );
+  at_ca GC_GROOVY_VR = jf_s ( jy_ge ( "GroovySystem.version" ) );
 
-  auto jy_gm ( at_cr(jobject) xr_oj, at_ct(char) xt_nm, at_cr(QList<jobject>) xr_args ) { // (g)roovy invoke (m)ethod
+  at_ca JC_TRUE  = jy_ge ("true");
+  at_ca JC_FALSE = jy_ge ("false");
+
+  auto jy_gm ( at_cr(jobject) xr_oj, at_cr(CgQS) xr_nm, at_cr(QList<jobject>) xr_args ) { // (g)roovy invoke (m)ethod
     static at_ca ysu_mi = jf_mi ( jf_fc ("javax/script/Invocable"), "invokeMethod", "(Ljava/lang/Object;Ljava/lang/String;[Ljava/lang/Object;)Ljava/lang/Object;" );
-    static at_ca ysu_cls_oj = jf_fc ("java/lang/Object");
-    return jf_om ( GC_GR, ysu_mi, xr_oj, jf_ns (xt_nm), jf_noa ( ysu_cls_oj, xr_args ) );
+    return jf_om ( GC_GR, ysu_mi, xr_oj, jf_ns (xr_nm), jf_noa ( CjObject, xr_args ) );
   }
-  auto jy_gm ( at_cr(jobject) xr_oj, at_cr(CgQS) xr_nm, at_cr(QList<jobject>) xr_args ) { return jy_gm ( xr_oj, af_qc(xr_nm), xr_args ); }
+  auto jy_gf ( at_cr(CgQS) xr_nm, at_cr(QList<jobject>) xr_args ) { // (g)roovy invoke (f)unction
+    static at_ca ysu_mi = jf_mi ( jf_fc ("javax/script/Invocable"), "invokeFunction", "(Ljava/lang/String;[Ljava/lang/Object;)Ljava/lang/Object;" );
+    return jf_om ( GC_GR, ysu_mi, jf_ns (xr_nm), jf_noa ( CjObject, xr_args ) );
+  }
+
+  ap_br ( signal ( SIGINT, [] ( int xl_sig_num ) { gp_request_exit ( xl_sig_num, { CgQS ( "Interrupt signal (%1) received !!!" ) .arg ( CgQSn (xl_sig_num) ) } ); } ); );
 }
 
 //
@@ -465,6 +442,7 @@ namespace DRun {
   auto __dav_ec = GC_EC_NONE;
   auto __dav_ex = QStringList ();
   void __dap_begin () {
+    AC_STDOUT << __gaf_banner () .join ('\n') << endl;
     AC_LOG .debug ( "Pyja name => %s" , af_qc (GC_PYJA_NM) );
     if ( GC_PYJA_NM != gf_os_env ("SC_PYJA_NM") ) { ap_throw ( "Invalid Pyja name" ); }
     AC_LOG .debug ( "Pyja creation date => %s" , af_qc (GC_PYJA_CD) );
@@ -516,6 +494,16 @@ namespace DRun {
 #include <QVBoxLayout>
 #include <QWidget>
 
+ap_br (
+  foreach ( at_cr(CgQS) br2_jar_fn, QStringList ({
+    gf_pj ({ GC_PYJA_HM, "Library", "AppDirs", "1.0.0", "appdirs-1.0.0.jar" }),
+    gf_pj ({ GC_PYJA_HM, "Library", "JNA", "4.5.1", "jna-4.5.1.jar" }),
+    gf_pj ({ GC_PYJA_HM, "Library", "JNA", "4.5.1", "jna-platform-4.5.1.jar" }),
+    gf_pj ({ GC_PYJA_HM, "Library", "SLF4J", "1.7.25", "slf4j-api-1.7.25.jar" }),
+    gf_pj ({ GC_PYJA_HM, "Library", "SLF4J", "1.7.25", "slf4j-nop-1.7.25.jar" }),
+  }) ) { jp_add_jar (br2_jar_fn); }
+);
+
 class WMain : public QMainWindow {
   Q_OBJECT
 public :
@@ -565,12 +553,12 @@ public :
       at_ca pu_nm = jf_ns (wu_app_nm);
       at_ca pu_vr = jf_ns (wu_app_vr);
       at_ca pu_au = jf_ns (wu_app_au);
-      mp2_set_item ( 0, "User data path",   gf_2uhs ( zf_qs ( jy_gm ( pu2_ad, "getUserDataDir",   { pu_nm, pu_vr, pu_au } ) ) ) );
-      mp2_set_item ( 1, "User config path", gf_2uhs ( zf_qs ( jy_gm ( pu2_ad, "getUserConfigDir", { pu_nm, pu_vr, pu_au } ) ) ) );
-      mp2_set_item ( 2, "User cache path",  gf_2uhs ( zf_qs ( jy_gm ( pu2_ad, "getUserCacheDir",  { pu_nm, pu_vr, pu_au } ) ) ) );
-      mp2_set_item ( 3, "User log path",    gf_2uhs ( zf_qs ( jy_gm ( pu2_ad, "getUserLogDir",    { pu_nm, pu_vr, pu_au } ) ) ) );
-      mp2_set_item ( 4, "Site data path",   gf_2uhs ( zf_qs ( jy_gm ( pu2_ad, "getSiteDataDir",   { pu_nm, pu_vr, pu_au } ) ) ) );
-      mp2_set_item ( 5, "Site config path", gf_2uhs ( zf_qs ( jy_gm ( pu2_ad, "getSiteConfigDir", { pu_nm, pu_vr, pu_au } ) ) ) );
+      mp2_set_item ( 0, "User data path",   gf_2uhs ( jf_s ( jy_gm ( pu2_ad, "getUserDataDir",   { pu_nm, pu_vr, pu_au } ) ) ) );
+      mp2_set_item ( 1, "User config path", gf_2uhs ( jf_s ( jy_gm ( pu2_ad, "getUserConfigDir", { pu_nm, pu_vr, pu_au } ) ) ) );
+      mp2_set_item ( 2, "User cache path",  gf_2uhs ( jf_s ( jy_gm ( pu2_ad, "getUserCacheDir",  { pu_nm, pu_vr, pu_au } ) ) ) );
+      mp2_set_item ( 3, "User log path",    gf_2uhs ( jf_s ( jy_gm ( pu2_ad, "getUserLogDir",    { pu_nm, pu_vr, pu_au } ) ) ) );
+      mp2_set_item ( 4, "Site data path",   gf_2uhs ( jf_s ( jy_gm ( pu2_ad, "getSiteDataDir",   { pu_nm, pu_vr, pu_au } ) ) ) );
+      mp2_set_item ( 5, "Site config path", gf_2uhs ( jf_s ( jy_gm ( pu2_ad, "getSiteConfigDir", { pu_nm, pu_vr, pu_au } ) ) ) );
     );
     mtl_it ->resizeColumnsToContents ();
     return mtl_it;
@@ -594,7 +582,7 @@ namespace DBody {
 
 namespace OStart {
   void main () {
-    gp_set_log_level_to_info ();
+    // gp_set_log_level_to_info ();
     DRun::dp_it ();
   }
 }
