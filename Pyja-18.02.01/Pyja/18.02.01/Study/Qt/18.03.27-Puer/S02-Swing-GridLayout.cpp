@@ -626,9 +626,15 @@ namespace Global {
     }
   }
 
+  class __CgQnProcessor : public QObject {
+    Q_OBJECT
+  public :
+    explicit __CgQnProcessor () : QObject (Q_NULLPTR) { jy_ge ( CgQS ( "GC_QN_PROCESSOR = %1" ) .arg (ZC_QO) ); }
+    Q_INVOKABLE void cn_do () { jy_ge ( "gp_qn_from_queue ()" ); }
+  };
+  auto * __gatl_xx = new __CgQnProcessor ();
   ap_br (
     jy_ge ( CgQS ( R"(
-      GC_MAIN_QO = null
       __gau_queue_4_%1 = []
       __gau_lock_4_%1 = new Object ()
       %1 = { final int x_ct = DgQt.DC_CT_DC, final long x_qo, final String x_mn, final Object... x_args ->
@@ -639,7 +645,7 @@ namespace Global {
         if ( pu_nargs > 0 && GC_THIS_TID != pu_caller_tid ) {
           synchronized (__gau_lock_4_%1) {
             __gau_queue_4_%1 << [ x_ct, x_qo, x_mn, x_args ]
-            if (GC_MAIN_QO) { DgQt .dp_i0 ( GC_MAIN_QO, 'yn_qn', DgQt.DC_CT_QC ) }
+            if (GC_QN_PROCESSOR) { DgQt .dp_i0 ( GC_QN_PROCESSOR, 'cn_do', DgQt.DC_CT_QC ) }
           }
           return
         }
@@ -663,9 +669,6 @@ namespace Global {
       } 
     )" ) .arg ("gp_qn") );
   );
-
-  #define ZP_GC_MAIN_QO() jy_ge ( CgQS ( "GC_MAIN_QO = %1" ) .arg (ZC_QO) )
-  #define ZN_YN_QN Q_INVOKABLE void yn_qn () { jy_ge ( "gp_qn_from_queue ()" ); }
 
   ap_br (
     jy_ge ( R"(
@@ -730,69 +733,64 @@ namespace DRun {
 
 class WMain : public QObject {
   Q_OBJECT
-  ZN_YN_QN
 public :
-  explicit WMain ( QObject * xtl_parent = Q_NULLPTR ) : QObject (xtl_parent) { wn_init (); }
-  void wn_init () {
-    ZP_GC_MAIN_QO (); 
-    jy_ge ( CgQS ( R"(
-      import javax.swing.*
-      import java.awt.event.*
-      import java.awt.*
+  explicit WMain () : QObject (Q_NULLPTR) { wn_init (); }
+  void wn_init () { jy_ge ( CgQS ( R"(
+    import javax.swing.*
+    import java.awt.event.*
+    import java.awt.*
 
-      { ->
-        final def bu3_fm
-        final def bu3_lb_header
-        final def bu3_pl_control
-        final def bu3_bn_ok
-        final def bu3_lb_status
+    { ->
+      final def bu2_qo = %1
+      final def bu2_fm
+      final def bu2_lb_header
+      final def bu2_pl_control
+      final def bu2_bn_ok
+      final def bu2_lb_status
 
-        def bv3_cnt = 0
+      def bv2_cnt = 0
 
-        def pp4_new_main_fm = { ->
-          bu3_fm = new JFrame () .with {
-            setTitle GC_APP_NM
-            setSize 400, 400
-            setLayout new GridLayout ( 3, 1 )
-            setLocationRelativeTo null
-            addWindowListener ( [
-              windowClosing : { gp_qn %1, 'wn_quit' }
-            ] as WindowAdapter )
-            setVisible true
-            it
-          }
-          bu3_lb_header = new JLabel ( 'This is JFrame', JLabel.CENTER )
-          bu3_pl_control = new JPanel ( layout : new FlowLayout () )
-          bu3_bn_ok = new JButton ( "Click me [${bv3_cnt+1}]" ) .with {
-            it .actionPerformed = {
-              bv3_cnt ++
-              gp_qn %1, 'wn_bn_ok', bu3_bn_ok, bu3_fm, bu3_lb_status, bv3_cnt
-            }
-            bu3_pl_control .add it
-            it
-          }
-          bu3_lb_status = new JLabel ( text : '', horizontalAlignment : JLabel.CENTER, size : [ 350, 100 ] )
-          [ bu3_lb_header, bu3_pl_control, bu3_lb_status ] .each { bu3_fm .add it }
+      def pp3_new_main_fm = { ->
+        bu2_fm = new JFrame () .with {
+          setTitle GC_APP_NM
+          setSize 400, 400
+          setLayout new GridLayout ( 3, 1 )
+          setLocationRelativeTo null
+          addWindowListener ( [
+            windowClosing : { gp_qn GC_QAPP, 'quit' }
+          ] as WindowAdapter )
+          setVisible true
+          it
         }
+        bu2_lb_header = new JLabel ( 'This is JFrame with GridLayout', JLabel.CENTER )
+        bu2_pl_control = new JPanel ( layout : new FlowLayout () )
+        bu2_bn_ok = new JButton ( "Click me with count ${bv2_cnt+1}" ) .with {
+          it .actionPerformed = {
+            bv2_cnt ++
+            gp_qn bu2_qo, 'wn_bn_ok', bu2_bn_ok, bu2_fm, bu2_lb_status, bv2_cnt
+          }
+          bu2_pl_control .add it
+          it
+        }
+        bu2_lb_status = new JLabel ( text : '', horizontalAlignment : JLabel.CENTER, size : [ 350, 100 ] )
+        [ bu2_lb_header, bu2_pl_control, bu2_lb_status ] .each { bu2_fm .add it }
+      }
 
-        pp4_new_main_fm ()
-      } ()
-    )" ) .arg (ZC_QO) );
-  }
+      pp3_new_main_fm ()
+    } ()
+  )" ) .arg (ZC_QO) ); }
   Q_INVOKABLE void wn_bn_ok ( at_cr (jobject) xr_bn_ok, at_cr (jobject) xr_fm, at_cr (jobject) xr_lb_status, at_cr (jobject) xr_cnt ) {
-    jy_gm ( xr_fm, "setTitle", { jf_ns ( CgQS ( "%1 [Qt] (%2)" ) .arg ( GC_APP_NM, CgQSn ( jf_i (xr_cnt) ) ) ) } );
-    jy_gm ( xr_lb_status, "setText", { jf_ns ( CgQS ( "[Qt] (%1) A Frame shown to the user" ) .arg ( jf_i (xr_cnt) ) ) } );
-    jy_gm ( xr_bn_ok, "setText", { jf_ns ( CgQS ( "Click me [Qt] [%1]" ) .arg ( jf_i (xr_cnt) + 1 ) ) } );
+    jy_gm ( xr_fm, "setTitle", { jf_ns ( CgQS ( "%1 (%2)" ) .arg ( GC_APP_NM, CgQSn ( jf_i (xr_cnt) ) ) ) } );
+    jy_gm ( xr_lb_status, "setText", { jf_ns ( CgQS ( "(%1) Hello Swing from Qt" ) .arg ( jf_i (xr_cnt) ) ) } );
+    jy_gm ( xr_bn_ok, "setText", { jf_ns ( CgQS ( "Click me with count %1" ) .arg ( jf_i (xr_cnt) + 1 ) ) } );
   }
-  Q_INVOKABLE void wn_quit () { AC_QAPP .quit (); }
 };
 
 #include "S02-Swing-GridLayout.moc"
 
 namespace DBody {
   int df_it () {
-    WMain * ftl_w;
-    QTimer::singleShot ( 0, [&] { ftl_w = new WMain (); } );
+    QTimer::singleShot ( 0, [] { new WMain (); } );
     return AC_QAPP .exec ();
   }
 }
