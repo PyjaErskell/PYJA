@@ -293,7 +293,10 @@ namespace Global {
   at_ca CjObject = zy ( FindClass("java/lang/Object") );
   at_ca CjClass  = zy ( FindClass("java/lang/Class") );
 
-  auto jf_s ( at_c(jobject) x_jstr ) { // get string from jstring
+  #define zt_call Q_INVOKABLE void
+  #define zt_o(x_param) at_c (jobject) x_param
+
+  auto jf_s ( zt_o(x_jstr) ) { // get string from jstring
     jboolean fv_is_copy = false;
     at_ct(char) ft_utf = zy ( GetStringUTFChars ( (jstring) x_jstr, & fv_is_copy ) );
     at_ca fu_qstr = CgQS (ft_utf);
@@ -332,14 +335,14 @@ namespace Global {
     for ( auto bl2_idx = 0; bl2_idx < xr_lst .size (); ++bl2_idx ) { zp_xie ( SetObjectArrayElement ( fu_oa, bl2_idx, xr_lst .at (bl2_idx) ) ); }
     return fu_oa;
   }
-  auto jf_om ( at_c(jobject) x_oj, at_c(jmethodID) x_mi, ... ) { // call (o)bject (m)ethod
+  auto jf_om ( zt_o(x_oj), at_c(jmethodID) x_mi, ... ) { // call (o)bject (m)ethod
     va_list fl_args;
     va_start ( fl_args, x_mi );
     at_ca fu_oj = zf_xie ( CallObjectMethodV ( x_oj, x_mi, fl_args ) );
     va_end (fl_args);
     return fu_oj;
   }
-  void jp_on ( at_c(jobject) x_oj, at_c(jmethodID) x_mi, ... ) { // call (o)bject (n)ethod
+  void jp_on ( zt_o(x_oj), at_c(jmethodID) x_mi, ... ) { // call (o)bject (n)ethod
     va_list pl_args;
     va_start ( pl_args, x_mi );
     zp_xie ( CallObjectMethodV ( x_oj, x_mi, pl_args ) );
@@ -390,7 +393,7 @@ namespace Global {
     );
   }
 
-  auto jf_i ( at_c(jobject) x_it ) {
+  auto jf_i ( zt_o(x_it) ) {
     static at_ca fsu_mi = jf_mi ( jf_fc ("java/lang/Integer"), "intValue", "()I" );
     return zf_xie ( CallIntMethod ( x_it, fsu_mi ) );
   }
@@ -424,9 +427,9 @@ namespace Global {
     );
   }
   at_ca GC_GR = jf_script_engine ("Groovy");
-  auto jy_se ( at_cr(jobject) xr_se, at_cr(CgQS) xr_script ) { // (s)cript (e)val
+  auto jy_se ( zt_o(x_se), at_cr(CgQS) xr_script ) { // (s)cript (e)val
     return jf_om (
-      xr_se,
+      x_se,
       jf_mi ( jf_fc ("javax/script/ScriptEngine"), "eval", "(Ljava/lang/String;)Ljava/lang/Object;" ),
       jf_ns (xr_script )
     );
@@ -454,7 +457,6 @@ namespace Global {
     jy_ge ( R"(
       gf_tid = { Thread .currentThread () .getId () }
       GC_THIS_TID = gf_tid ()
-      println GC_THIS_TID
     )" );
   );
 
@@ -463,12 +465,12 @@ namespace Global {
   at_ca JC_TRUE  = jy_ge ("true");
   at_ca JC_FALSE = jy_ge ("false");
 
-  auto jy_gm ( at_cr(jobject) xr_oj, at_cr(CgQS) xr_nm, at_cr(QList<jobject>) xr_args ) { // (g)roovy invoke (m)ethod
+  auto jy_gm ( zt_o(x_oj), at_cr(CgQS) xr_nm, at_cr(QList<jobject>) xr_args ) { // (g)roovy invoke (m)ethod
     static at_ca ysu_mi = jf_mi ( jf_fc ("javax/script/Invocable"), "invokeMethod", "(Ljava/lang/Object;Ljava/lang/String;[Ljava/lang/Object;)Ljava/lang/Object;" );
-    return jf_om ( GC_GR, ysu_mi, xr_oj, jf_ns (xr_nm), jf_noa ( CjObject, xr_args ) );
+    return jf_om ( GC_GR, ysu_mi, x_oj, jf_ns (xr_nm), jf_noa ( CjObject, xr_args ) );
   }
-  auto jy_gc ( at_cr(jobject) xr_closure, at_cr(QList<jobject>) xr_args ) { // (g)roovy invoke (c)losure
-    return jy_gm ( xr_closure, "call", xr_args );
+  auto jy_gc ( zt_o(x_closure), at_cr(QList<jobject>) xr_args ) { // (g)roovy invoke (c)losure
+    return jy_gm ( x_closure, "call", xr_args );
   }
   auto jy_gf ( at_cr(CgQS) xr_nm, at_cr(QList<jobject>) xr_args ) { // (g)roovy invoke (f)unction
     static at_ca ysu_mi = jf_mi ( jf_fc ("javax/script/Invocable"), "invokeFunction", "(Ljava/lang/String;[Ljava/lang/Object;)Ljava/lang/Object;" );
@@ -630,11 +632,12 @@ namespace Global {
     Q_OBJECT
   public :
     explicit __CgQnProcessor () : QObject (Q_NULLPTR) { jy_ge ( CgQS ( "GC_QN_PROCESSOR = %1" ) .arg (ZC_QO) ); }
-    Q_INVOKABLE void cn_do () { jy_ge ( "gp_qn_from_queue ()" ); }
+    zt_call cn_do () { jy_ge ( "gp_qn_from_queue ()" ); }
   };
   auto * __gatl_xx = new __CgQnProcessor ();
   ap_br (
     jy_ge ( CgQS ( R"(
+      gp_sr = { final Closure xp_it -> javax.swing.SwingUtilities .invokeLater { xp_it () } }
       __gau_queue_4_%1 = []
       __gau_lock_4_%1 = new Object ()
       %1 = { final int x_ct = DgQt.DC_CT_DC, final long x_qo, final String x_mn, final Object... x_args ->
@@ -672,7 +675,12 @@ namespace Global {
 
   ap_br (
     jy_ge ( R"(
-      gp_sr = { final Closure xp_it -> javax.swing.SwingUtilities .invokeLater { xp_it () } }
+      gp_xr = { final Closure xp_it -> javafx.application.Platform .runLater { xp_it () } }
+      class CgFxApp extends javafx.application.Application {
+        private static Closure __casp_start
+        static void csn_launch ( final Closure xp_it ) { __casp_start = xp_it; launch this }
+        void start ( final javafx.stage.Stage x_stage ) { __casp_start ( this, x_stage ) }
+      }
     )" );
   );
 
@@ -779,10 +787,10 @@ public :
       pp3_new_main_fm ()
     } ()
   )" ) .arg (ZC_QO) ); }
-  Q_INVOKABLE void wn_bn_ok ( at_cr (jobject) xr_bn_ok, at_cr (jobject) xr_fm, at_cr (jobject) xr_lb_status, at_cr (jobject) xr_cnt ) {
-    jy_gm ( xr_fm, "setTitle", { jf_ns ( CgQS ( "%1 (%2)" ) .arg ( GC_APP_NM, CgQSn ( jf_i (xr_cnt) ) ) ) } );
-    jy_gm ( xr_lb_status, "setText", { jf_ns ( CgQS ( "(%1) Hello Swing from Qt" ) .arg ( jf_i (xr_cnt) ) ) } );
-    jy_gm ( xr_bn_ok, "setText", { jf_ns ( CgQS ( "Click me with count %1" ) .arg ( jf_i (xr_cnt) + 1 ) ) } );
+  zt_call wn_bn_ok ( zt_o(x_bn_ok), zt_o(x_fm), zt_o(x_lb_status), zt_o(x_cnt) ) {
+    jy_gm ( x_fm, "setTitle", { jf_ns ( CgQS ( "%1 (%2)" ) .arg ( GC_APP_NM, CgQSn ( jf_i (x_cnt) ) ) ) } );
+    jy_gm ( x_lb_status, "setText", { jf_ns ( CgQS ( "(%1) Hello Swing from Qt" ) .arg ( jf_i (x_cnt) ) ) } );
+    jy_gm ( x_bn_ok, "setText", { jf_ns ( CgQS ( "Click me with count %1" ) .arg ( jf_i (x_cnt) + 1 ) ) } );
   }
 };
 
