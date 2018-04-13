@@ -1,0 +1,3 @@
+SET SC_SIRE_HM=C:\Program Files (x86)\Sire
+SET SC_SIRE_X_FN=%SC_SIRE_HM%\PNetT.exe
+SET SC_SIRE_C_X_FN=%SC_SIRE_HM%\PNetTC.exe
