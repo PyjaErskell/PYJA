@@ -18,7 +18,7 @@ FOR %%F IN (%SC_PYJA_RT%) DO SET SC_PYJA_NM=%%~NXF
 POPD
 
 CALL "%SC_PYJA_HM%\Config\SSet-JDK-8-(x32).bat"
-CALL "%SC_PYJA_HM%\Config\SSet-ActivePython-3.6.0-(x32).bat"
+CALL "%SC_PYJA_HM%\Config\SSet-Anaconda3-5.1.0-(x32).bat"
 
 SET JAVA_HOME=%SC_J8_HM%
 SET SC_JAVA_XMX=-Xmx512m
