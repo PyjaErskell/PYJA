@@ -277,12 +277,12 @@ def gp_log_exception ( xp_out, x_title, x_ex_list ) :
     for bu2_it in x_ex_list : xp_out (bu2_it)
 
 def gf_yo (x_yi) : # p(y)thon (o)bject
-  fu_it = ctypes.cast ( x_yi, ctypes.py_object ) .value
+  fu_it = ctypes .cast ( x_yi, ctypes.py_object ) .value
   return fu_it
 def gf_yi (x_yo) : return id (x_yo) # p(y)thon (i)d
 
-def gp_yon ( x_yio, x_nethod_nm, *x_args ) : # qo_id is yio
-  pu_yo = gf_yo (x_yio)
+def gp_yn ( x_yi, x_nethod_nm, *x_args ) : # call p(y)thon (n)ethod
+  pu_yo = gf_yo (x_yi)
   if hasattr ( pu_yo, x_nethod_nm ) : getattr ( pu_yo, x_nethod_nm ) (*x_args)
 
 #
@@ -418,8 +418,8 @@ def jp_set_log_level_to_trace () : jy_gf ( 'gp_set_log_level_to_trace' )
 def jp_request_exit ( x_ec, x_ex_list = None ) : jy_gf ( 'gp_request_exit', x_ec, x_ex_list )
 
 jy_ge ('''
-  gp_yon = { final long x_yio, final String x_nethod_nm, final Object... x_args ->
-    GC_JEP .invoke ( 'gp_yon', x_yio, x_nethod_nm, *x_args )
+  gp_yn = { final long x_yi, final String x_nethod_nm, final Object... x_args ->
+    GC_JEP .invoke ( 'gp_yn', x_yi, x_nethod_nm, *x_args )
   }
 ''')
 jy_ge ( 'gp_sr = { final Closure xp_it -> javax.swing.SwingUtilities .invokeLater { xp_it () } }' )
@@ -487,14 +487,14 @@ class WMain :
     super () .__init__ ()
     QTimer.singleShot ( 0, lambda : self .__wan_init () )
   def __wan_init (self) :
-    self.wu_yio = gf_yi (self)
+    self.wu_yi = gf_yi (self)
     jy_ge (f'''
       import javafx.scene.control.Button
       import javafx.scene.layout.StackPane
       import javafx.scene.Scene
 
       __sap_fx_start = {{ final x_app, final x_stage ->
-        final pu_yio = {self.wu_yio}
+        final pu_yi = {self.wu_yi}
         final pu_stage = x_stage
         def pv_cnt = 0
         final pu_bn = new Button () .with {{
@@ -502,7 +502,7 @@ class WMain :
           onAction = {{ bu3_ev ->
             pv_cnt ++
             GC_LOG .info text
-            gp_yon pu_yio, 'wn_bn', pv_cnt, {{ x4_text -> gp_xr {{ text = x4_text }} }}
+            gp_yn pu_yi, 'wn_bn', pv_cnt, {{ x4_text -> gp_xr {{ text = x4_text }} }}
           }}
           it
         }}
@@ -513,7 +513,7 @@ class WMain :
         pu_stage .with {{
           title = GC_APP_NM
           scene = gf_new_scene {{ new Scene ( pu_root, 300, 150 ) }}
-          onCloseRequest = {{ gp_yon pu_yio, 'wn_sw_quit' }}
+          onCloseRequest = {{ gp_yn pu_yi, 'wn_sw_quit' }}
           show ()
         }}
       }}

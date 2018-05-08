@@ -277,12 +277,12 @@ def gp_log_exception ( xp_out, x_title, x_ex_list ) :
     for bu2_it in x_ex_list : xp_out (bu2_it)
 
 def gf_yo (x_yi) : # p(y)thon (o)bject
-  fu_it = ctypes.cast ( x_yi, ctypes.py_object ) .value
+  fu_it = ctypes .cast ( x_yi, ctypes.py_object ) .value
   return fu_it
 def gf_yi (x_yo) : return id (x_yo) # p(y)thon (i)d
 
-def gp_yon ( x_yio, x_nethod_nm, *x_args ) : # qo_id is yio
-  pu_yo = gf_yo (x_yio)
+def gp_yn ( x_yi, x_nethod_nm, *x_args ) : # call p(y)thon (n)ethod
+  pu_yo = gf_yo (x_yi)
   if hasattr ( pu_yo, x_nethod_nm ) : getattr ( pu_yo, x_nethod_nm ) (*x_args)
 
 #
@@ -419,8 +419,8 @@ def jp_request_exit ( x_ec, x_ex_list = None ) : jy_gf ( 'gp_request_exit', x_ec
 
 jy_ge ( 'gp_sr = { final Closure xp_it -> javax.swing.SwingUtilities .invokeLater { xp_it () } }' )
 jy_ge ('''
-  gp_yon = { final long x_yio, final String x_nethod_nm, final Object... x_args ->
-    GC_JEP .invoke ( 'gp_yon', x_yio, x_nethod_nm, *x_args )
+  gp_yn = { final long x_yi, final String x_nethod_nm, final Object... x_args ->
+    GC_JEP .invoke ( 'gp_yn', x_yi, x_nethod_nm, *x_args )
   }
 ''')
 
@@ -478,14 +478,14 @@ class WMain :
     super () .__init__ ()
     QTimer.singleShot ( 0, lambda : self .__wan_init () )
   def __wan_init (self) :
-    self.wu_yio = gf_yi (self)
+    self.wu_yi = gf_yi (self)
     jy_ge (f'''
       import javax.swing.*
       import java.awt.event.*
       import java.awt.*
 
       {{ ->
-        final def bu2_yio = {self.wu_yio}
+        final def bu2_yi = {self.wu_yi}
         final def bu2_fm
         final def bu2_lb_header
         final def bu2_pl_control
@@ -501,7 +501,7 @@ class WMain :
             setLayout new GridLayout ( 3, 1 )
             setLocationRelativeTo null
             addWindowListener ( [
-              windowClosing : {{ gp_yon bu2_yio, 'wn_sw_quit' }}
+              windowClosing : {{ gp_yn bu2_yi, 'wn_sw_quit' }}
             ] as WindowAdapter )
             setVisible true
             it
@@ -511,7 +511,7 @@ class WMain :
           bu2_bn_ok = new JButton ( "Click me with count ${{bv2_cnt+1}}" ) .with {{
             it .actionPerformed = {{
               bv2_cnt ++
-              gp_yon bu2_yio, 'wn_bn_ok', bu2_bn_ok, bu2_fm, bu2_lb_status, bv2_cnt
+              gp_yn bu2_yi, 'wn_bn_ok', bu2_bn_ok, bu2_fm, bu2_lb_status, bv2_cnt
             }}
             bu2_pl_control .add it
             it
