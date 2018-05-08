@@ -281,9 +281,9 @@ def gf_yo (x_yi) : # p(y)thon (o)bject
   return fu_it
 def gf_yi (x_yo) : return id (x_yo) # p(y)thon (i)d
 
-def gp_qn ( x_qo_id, x_nethod_nm, *x_args ) : # qo_id is yio
-  nu_qo = gf_yo (x_qo_id)
-  if hasattr ( nu_qo, x_nethod_nm ) : getattr ( nu_qo, x_nethod_nm ) (*x_args)
+def gp_yon ( x_yio, x_nethod_nm, *x_args ) : # qo_id is yio
+  pu_yo = gf_yo (x_yio)
+  if hasattr ( pu_yo, x_nethod_nm ) : getattr ( pu_yo, x_nethod_nm ) (*x_args)
 
 #
 # Java (Global)
@@ -418,8 +418,8 @@ def jp_set_log_level_to_trace () : jy_gf ( 'gp_set_log_level_to_trace' )
 def jp_request_exit ( x_ec, x_ex_list = None ) : jy_gf ( 'gp_request_exit', x_ec, x_ex_list )
 
 jy_ge ('''
-  gp_qn = { final long x_qo_id, final String x_nethod_nm, final Object... x_args ->
-    GC_JEP .invoke ( 'gp_qn', x_qo_id, x_nethod_nm, *x_args )
+  gp_yon = { final long x_yio, final String x_nethod_nm, final Object... x_args ->
+    GC_JEP .invoke ( 'gp_yon', x_yio, x_nethod_nm, *x_args )
   }
 ''')
 jy_ge ( 'gp_sr = { final Closure xp_it -> javax.swing.SwingUtilities .invokeLater { xp_it () } }' )
@@ -482,19 +482,19 @@ class DRun :
 # Your Source
 #
 
-class WMain (QObject) :
+class WMain :
   def __init__ (self) :
     super () .__init__ ()
     QTimer.singleShot ( 0, lambda : self .__wan_init () )
   def __wan_init (self) :
-    self.wu_qo_id = gf_yi (self)
+    self.wu_yio = gf_yi (self)
     jy_ge (f'''
       import javafx.scene.control.Button
       import javafx.scene.layout.StackPane
       import javafx.scene.Scene
 
       __sap_fx_start = {{ final x_app, final x_stage ->
-        final pu_qo = {self.wu_qo_id}
+        final pu_yio = {self.wu_yio}
         final pu_stage = x_stage
         def pv_cnt = 0
         final pu_bn = new Button () .with {{
@@ -502,7 +502,7 @@ class WMain (QObject) :
           onAction = {{ bu3_ev ->
             pv_cnt ++
             GC_LOG .info text
-            gp_qn pu_qo, 'won_bn', pv_cnt, {{ x4_text -> gp_xr {{ text = x4_text }} }}
+            gp_yon pu_yio, 'wn_bn', pv_cnt, {{ x4_text -> gp_xr {{ text = x4_text }} }}
           }}
           it
         }}
@@ -513,15 +513,15 @@ class WMain (QObject) :
         pu_stage .with {{
           title = GC_APP_NM
           scene = gf_new_scene {{ new Scene ( pu_root, 300, 150 ) }}
-          onCloseRequest = {{ gp_qn pu_qo, 'won_sw_quit' }}
+          onCloseRequest = {{ gp_yon pu_yio, 'wn_sw_quit' }}
           show ()
         }}
       }}
       Thread .start {{ CgFxApp .csn_launch (__sap_fx_start) }}
     ''')
-  def won_bn ( self, x_cnt, xp_it ) :
+  def wn_bn ( self, x_cnt, xp_it ) :
     jy_gc ( xp_it, f'({x_cnt+1}) Hello World from Qt' )
-  def won_sw_quit (self) : GC_QAPP .quit ()
+  def wn_sw_quit (self) : GC_QAPP .quit ()
 
 class DBody :
   @classmethod

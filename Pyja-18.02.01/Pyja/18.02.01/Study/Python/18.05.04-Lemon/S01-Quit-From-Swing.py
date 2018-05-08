@@ -281,9 +281,9 @@ def gf_yo (x_yi) : # p(y)thon (o)bject
   return fu_it
 def gf_yi (x_yo) : return id (x_yo) # p(y)thon (i)d
 
-def gp_qn ( x_qo_id, x_nethod_nm, *x_args ) : # qo_id is yio
-  nu_qo = gf_yo (x_qo_id)
-  if hasattr ( nu_qo, x_nethod_nm ) : getattr ( nu_qo, x_nethod_nm ) (*x_args)
+def gp_yon ( x_yio, x_nethod_nm, *x_args ) :
+  pu_yo = gf_yo (x_yio)
+  if hasattr ( pu_yo, x_nethod_nm ) : getattr ( pu_yo, x_nethod_nm ) (*x_args)
 
 #
 # Java (Global)
@@ -419,8 +419,8 @@ def jp_request_exit ( x_ec, x_ex_list = None ) : jy_gf ( 'gp_request_exit', x_ec
 
 jy_ge ( 'gp_sr = { final Closure xp_it -> javax.swing.SwingUtilities .invokeLater { xp_it () } }' )
 jy_ge ('''
-  gp_qn = { final long x_qo_id, final String x_nethod_nm, final Object... x_args ->
-    GC_JEP .invoke ( 'gp_qn', x_qo_id, x_nethod_nm, *x_args )
+  gp_yon = { final long x_yio, final String x_nethod_nm, final Object... x_args ->
+    GC_JEP .invoke ( 'gp_yon', x_yio, x_nethod_nm, *x_args )
   }
 ''')
 
@@ -473,30 +473,30 @@ class DRun :
 # Your Source
 #
 
-class WMain (QObject) :
+class WMain :
   def __init__ (self) :
     super () .__init__ ()
     QTimer.singleShot ( 0, lambda : self .__wan_init () )
   def __wan_init (self) :
-    self.wu_qo_id = gf_yi (self)
-    self.__class__.__wacu_new_frame_el = jy_ge ( '''{ x_qo_id ->
+    self.wu_yio = gf_yi (self)
+    self.__class__.__wacu_new_frame_el = jy_ge ( '''{ x_yio ->
       return new java.awt.event.WindowAdapter () {
         void windowClosing ( final java.awt.event.WindowEvent x_ev ) {
           GC_LOG .info "(Groovy) About to close ..."
-          GC_LOG .info "(Groovy) Calling WMain.won_sw_quit () ..."
-          gp_qn x_qo_id, 'won_sw_quit'
+          GC_LOG .info "(Groovy) Calling WMain.wn_sw_quit () ..."
+          gp_yon x_yio, 'wn_sw_quit'
         }
       }
     }''')
-    jy_ge ( f"Thread .start {{ gp_qn {self.wu_qo_id}, 'won_sw_start', new javax.swing.JFrame () }}"  )
-  def won_sw_start ( self, x_frame ) :
+    jy_ge ( f"Thread .start {{ gp_yon {self.wu_yio}, 'wn_sw_start', new javax.swing.JFrame () }}"  )
+  def wn_sw_start ( self, x_frame ) :
     self.wu_frame = x_frame
     self.wu_frame .setTitle (GC_APP_NM)
     self.wu_frame .setSize ( 350, 300 )
     self.wu_frame .setLocationRelativeTo (None)
-    self.wu_frame .addWindowListener ( jy_gc ( self.__class__.__wacu_new_frame_el, self.wu_qo_id ) )
+    self.wu_frame .addWindowListener ( jy_gc ( self.__class__.__wacu_new_frame_el, self.wu_yio ) )
     self.wu_frame .setVisible (True)
-  def won_sw_quit (self) :
+  def wn_sw_quit (self) :
     JC_LOG .info ( '(Qt) About to quit' )
     GC_QAPP .quit ()
 

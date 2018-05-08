@@ -281,9 +281,9 @@ def gf_yo (x_yi) : # p(y)thon (o)bject
   return fu_it
 def gf_yi (x_yo) : return id (x_yo) # p(y)thon (i)d
 
-def gp_qn ( x_qo_id, x_nethod_nm, *x_args ) : # qo_id is yio
-  nu_qo = gf_yo (x_qo_id)
-  if hasattr ( nu_qo, x_nethod_nm ) : getattr ( nu_qo, x_nethod_nm ) (*x_args)
+def gp_yon ( x_yio, x_nethod_nm, *x_args ) : # qo_id is yio
+  pu_yo = gf_yo (x_yio)
+  if hasattr ( pu_yo, x_nethod_nm ) : getattr ( pu_yo, x_nethod_nm ) (*x_args)
 
 #
 # Java (Global)
@@ -419,8 +419,8 @@ def jp_request_exit ( x_ec, x_ex_list = None ) : jy_gf ( 'gp_request_exit', x_ec
 
 jy_ge ( 'gp_sr = { final Closure xp_it -> javax.swing.SwingUtilities .invokeLater { xp_it () } }' )
 jy_ge ('''
-  gp_qn = { final long x_qo_id, final String x_nethod_nm, final Object... x_args ->
-    GC_JEP .invoke ( 'gp_qn', x_qo_id, x_nethod_nm, *x_args )
+  gp_yon = { final long x_yio, final String x_nethod_nm, final Object... x_args ->
+    GC_JEP .invoke ( 'gp_yon', x_yio, x_nethod_nm, *x_args )
   }
 ''')
 
@@ -473,19 +473,19 @@ class DRun :
 # Your Source
 #
 
-class WMain (QObject) :
+class WMain :
   def __init__ (self) :
     super () .__init__ ()
     QTimer.singleShot ( 0, lambda : self .__wan_init () )
   def __wan_init (self) :
-    self.wu_qo_id = gf_yi (self)
+    self.wu_yio = gf_yi (self)
     jy_ge (f'''
       import javax.swing.*
       import java.awt.event.*
       import java.awt.*
 
       {{ ->
-        final def bu2_qo = {self.wu_qo_id}
+        final def bu2_yio = {self.wu_yio}
         final def bu2_fm
         final def bu2_lb_header
         final def bu2_pl_control
@@ -501,7 +501,7 @@ class WMain (QObject) :
             setLayout new GridLayout ( 3, 1 )
             setLocationRelativeTo null
             addWindowListener ( [
-              windowClosing : {{ gp_qn bu2_qo, 'won_sw_quit' }}
+              windowClosing : {{ gp_yon bu2_yio, 'wn_sw_quit' }}
             ] as WindowAdapter )
             setVisible true
             it
@@ -511,7 +511,7 @@ class WMain (QObject) :
           bu2_bn_ok = new JButton ( "Click me with count ${{bv2_cnt+1}}" ) .with {{
             it .actionPerformed = {{
               bv2_cnt ++
-              gp_qn bu2_qo, 'won_bn_ok', bu2_bn_ok, bu2_fm, bu2_lb_status, bv2_cnt
+              gp_yon bu2_yio, 'wn_bn_ok', bu2_bn_ok, bu2_fm, bu2_lb_status, bv2_cnt
             }}
             bu2_pl_control .add it
             it
@@ -523,11 +523,11 @@ class WMain (QObject) :
         pp3_new_main_fm ()
       }} ()
     ''')
-  def won_bn_ok ( self, x_bn_ok, x_fm, x_lb_status, x_cnt ) :
+  def wn_bn_ok ( self, x_bn_ok, x_fm, x_lb_status, x_cnt ) :
     x_fm .setTitle ( f'{GC_APP_NM} ({x_cnt})' )
     x_lb_status .setText ( f'({x_cnt}) Hello Swing from Qt' )
     x_bn_ok .setText ( f'Click me with count {x_cnt+1}' )
-  def won_sw_quit (self) : GC_QAPP .quit ()
+  def wn_sw_quit (self) : GC_QAPP .quit ()
 
 class DBody :
   @classmethod
