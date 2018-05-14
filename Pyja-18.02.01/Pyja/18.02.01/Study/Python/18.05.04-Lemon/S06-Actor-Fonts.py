@@ -686,8 +686,6 @@ class WAtQtMain (CjAt) :
     self.wu_wgt .show ()
     self.wu_wgt .raise_ ()
     self .wn_move_center ()
-  def preStart (self) :
-    self.wu_yi = gf_yi (self)
     jy_ge (f'''
       __sap_fx_start = {{ final x_app, final x_stage ->
         final pu_yi = {self.wu_yi}
