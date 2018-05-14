@@ -321,7 +321,6 @@ class __CgQtRun (QThread) :
     self.__cag_it .connect ( lambda : self.cu_lambda (*self.cu_args) )
     self.__cag_it .emit ()
     gf_yo ( self.cu_yi, True )
-def gp_qr ( x_callable, *x_args ) : __CgQtRun ( x_callable, *x_args ) .start () # qr -> (q)t (r)un
 
 #
 # Java (Global)
@@ -384,6 +383,8 @@ for bu2_jar_fn in [
   gf_pj ( GC_PYJA_HM, 'Library', 'Akka', '2.5.9', 'akka-actor_2.12-2.5.9.jar' ),
   gf_pj ( GC_PYJA_HM, 'Library', 'Akka', '2.5.9', 'config-1.3.2.jar' ),
   gf_pj ( GC_PYJA_HM, 'Library', 'Akka', '2.5.9', 'scala-library.jar' ),
+  gf_pj ( GC_PYJA_HM, 'Library', 'JNA', '4.5.1', 'jna-4.5.1.jar' ),
+  gf_pj ( GC_PYJA_HM, 'Library', 'JNA', '4.5.1', 'jna-platform-4.5.1.jar' ),
   gf_pj ( GC_PYJA_HM, 'Library', 'Logback', '1.2.3', 'logback-classic-1.2.3.jar' ),
   gf_pj ( GC_PYJA_HM, 'Library', 'Logback', '1.2.3', 'logback-core-1.2.3.jar' ),
   gf_pj ( GC_PYJA_HM, 'Library', 'SLF4J', '1.7.25', 'slf4j-api-1.7.25.jar' ),
@@ -392,6 +393,7 @@ for bu2_jar_fn in [
 CjActorRef = jf_jcls ('akka.actor.ActorRef')
 CjAwait = jf_jcls ('scala.concurrent.Await')
 CjDuration = jf_jcls ('scala.concurrent.duration.Duration')
+CjPlatform  = jf_jcls ('com.sun.jna.Platform')
 
 jy_ge ('''
   GC_LOG = org.slf4j.LoggerFactory .getILoggerFactory () .with { bx2_lc ->
@@ -538,6 +540,10 @@ def jp_request_exit ( x_ec, x_ex_list = None ) :
     gp_log_dict ( JC_LOG .warn, 'Undeleted python llo(s)', pu_llos )
   jy_gf ( 'gp_request_exit', x_ec, x_ex_list )
 
+def jp_qr ( x_callable, *x_args ) :
+  if ( CjPlatform .isMac () ) : x_callable (*x_args)
+  else : __CgQtRun ( x_callable, *x_args ) .start () # qr -> (q)t (r)un
+
 #
 # Main Skeleton
 #
@@ -660,8 +666,8 @@ class WAtQtMain (CjAt) :
     nu_l = x_letter
     nu_lcn = nu_l.java_name
     JC_LOG .debug ( f'{self.__class__.__name__} : Received {nu_lcn}' )
-    if ( nu_lcn == 'LAtrFxMainCreated' ) : gp_qr ( self.wu_wgt .setEnabled, True )
-    elif ( nu_lcn == 'LNextFont' ) : gp_qr ( self.wn_change_font, False )
+    if ( nu_lcn == 'LAtrFxMainCreated' ) : jp_qr ( self.wu_wgt .setEnabled, True )
+    elif ( nu_lcn == 'LNextFont' ) : jp_qr ( self.wn_change_font, False )
   def wn_init (self) :
     self.wu_yi = gf_yi (self)
     self.wu_wgt = QMainWindow ()
@@ -686,13 +692,7 @@ class WAtQtMain (CjAt) :
     self.wu_wgt .show ()
     self.wu_wgt .raise_ ()
     self .wn_move_center ()
-    jy_ge (f'''
-      __sap_fx_start = {{ final x_app, final x_stage ->
-        final pu_yi = {self.wu_yi}
-        gp_yn pu_yi, 'wn_fx_start', x_app, x_stage
-      }}
-      Thread .start {{ CgFxApp .csn_launch (__sap_fx_start) }}
-    ''')
+    jy_ge ( f'''Thread .start {{ CgFxApp .csn_launch ( {{ final x_app, final x_stage -> gp_yn {self.wu_yi}, 'wn_fx_start', x_app, x_stage }} ) }}''' )
   def wn_fx_start ( self, x_app, x_stage ) :
     self.wu_atr_fx_main = jf_mk_atr ( WAtFxMain ( self .getSelf (), x_stage ), ':c' )
   def wn_change_font ( self, x_tell = True ) :
