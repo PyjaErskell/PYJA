@@ -652,6 +652,7 @@ class WAtFxMain (CjAt) :
     self.wu_bn .setText ( f"Say '{self.wv_msg}'" )
     self.wu_bn .setStyle ( f"-fx-font-family : '{nu_fnt_nm}'; -fx-font-size : 17px;" )
     self.wu_lb .setText ( f'{nu_nt} Font name : {nu_fnt_nm}' )
+    self .wn_move_center ()
     self.wv_fnt_idx += 1
     if x_tell : self .tell ( self.wu_atr_qt_main, WAtQtMain.LNextFont () )
   def wn_quit ( self, x_ev ) : GC_QAPP .quit ()
