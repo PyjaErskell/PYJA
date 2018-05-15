@@ -313,7 +313,7 @@ def gp_yn ( x_yi, x_nethod_nm, *x_args ) : # call p(y)thon (n)ethod
 class __CgQtRun (QThread) :
   __cag_it = pyqtSignal ()
   def __init__ ( self, x_callable, *x_args ) :
-    super () .__init__ ()
+    QThread .__init__ (self)
     self.cu_yi = gf_cllo (self)
     self.cu_lambda = x_callable
     self.cu_args = x_args
