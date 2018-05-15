@@ -373,11 +373,11 @@ def jf_jarray (x_py_list) :
 def jy_gf ( x_nm, *x_args ) : return JC_GR. invokeFunction ( x_nm, jf_jarray (x_args) )
 def jy_gm ( x_oj, x_nm, *x_args ) : return JC_GR. invokeMethod ( x_oj, x_nm, jf_jarray (x_args) )
 def jy_gc ( x_closure, *x_args ) : return jy_gm ( x_closure, 'call', *x_args )
-def jf_ga ( x_oj, x_attr_nm ) : return jy_gf ( 'gf_ga', x_oj, x_attr_nm )
+def jf_ga ( x_oj, x_attr_nm ) : return jy_gf ( 'gf_ga', x_oj, x_attr_nm ) # (g)roovy (a)ttribute
+def jf_gi (x_cls) : return jy_ge ( f'@groovy.transform.Immutable {x_cls}' ) # (g)roovy (i)mmutable class
 def jp_puts (x_str) : jy_gf ( 'gp_puts', x_str )
 def jf_jcls (x_cls_nm) : return jy_gf ( 'gf_jcls', x_cls_nm )
 def jp_add_jar (x_jar_fn) : jy_gf ( 'gp_add_jar', x_jar_fn )
-
 
 for bu2_jar_fn in [
   gf_pj ( GC_PYJA_HM, 'Library', 'Akka', '2.5.9', 'akka-actor_2.12-2.5.9.jar' ),
@@ -604,7 +604,7 @@ from PyQt5.QtWidgets import QVBoxLayout
 from PyQt5.QtWidgets import QWidget
 
 class WAtFxMain (CjAt) :
-  LNextFont = jy_ge ( "class {0} {{}}" .format ('LNextFont') )
+  LNextFont = jf_gi ( 'class LNextFont {}' )
   def __init__ ( self, x_atr_qt_main, x_stage ) :
     super () .__init__ ()
     self.wu_atr_qt_main = x_atr_qt_main
@@ -658,8 +658,8 @@ class WAtFxMain (CjAt) :
   def wn_quit ( self, x_ev ) : GC_QAPP .quit ()
 
 class WAtQtMain (CjAt) :
-  LAtrFxMainCreated = jy_ge ( "class {0} {{}}" .format ('LAtrFxMainCreated') )
-  LNextFont = jy_ge ( "class {0} {{}}" .format ('LNextFont') )
+  LAtrFxMainCreated = jf_gi ( 'class LAtrFxMainCreated {}' )
+  LNextFont = jf_gi ( 'class LNextFont {}' )
   def __init__ (self) :
     super () .__init__ ()
     self .wn_init ()
