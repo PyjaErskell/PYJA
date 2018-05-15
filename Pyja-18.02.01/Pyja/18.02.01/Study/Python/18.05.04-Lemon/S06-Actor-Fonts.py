@@ -540,9 +540,9 @@ def jp_request_exit ( x_ec, x_ex_list = None ) :
     gp_log_dict ( JC_LOG .warn, 'Undeleted python llo(s)', pu_llos )
   jy_gf ( 'gp_request_exit', x_ec, x_ex_list )
 
-def jp_qr ( x_callable, *x_args ) :
+def jp_qr ( x_callable, *x_args ) :  # qr -> (q)t (r)un
   if ( CjPlatform .isMac () ) : x_callable (*x_args)
-  else : __CgQtRun ( x_callable, *x_args ) .start () # qr -> (q)t (r)un
+  else : __CgQtRun ( x_callable, *x_args ) .start ()
 
 #
 # Main Skeleton
