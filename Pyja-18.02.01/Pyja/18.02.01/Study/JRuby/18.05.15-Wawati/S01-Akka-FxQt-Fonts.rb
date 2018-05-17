@@ -408,7 +408,7 @@ def gp_qr &x_block; com.trolltech.qt.core.QCoreApplication.invokeLater { x_block
 module TgQtSlot
   def tm_qt_slot &x_block
     mu_it = gy_gr_call "gf_qs#{x_block.arity}", x_block
-    ( @cu_qs_llos ||= [] ) << mu_it
+    ( @tu_qs_llos ||= [] ) << mu_it
     return mu_it
   end
 end
