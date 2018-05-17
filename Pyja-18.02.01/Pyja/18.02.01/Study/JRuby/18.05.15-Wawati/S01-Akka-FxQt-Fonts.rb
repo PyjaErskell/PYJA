@@ -589,7 +589,7 @@ class WAtQtMain < CgAt
     end
   end
   def wn_init
-    @wu_wgt = QMainWindow.new
+    @wu_wgt = QMainWindow.new.tap { |it| it.window_title = "#{GC_APP_NM} - QtJambi" }
     @wu_cw = QWidget.new
     @wu_lo = QVBoxLayout.new
     @wu_pb = QPushButton.new.tap { |it|
