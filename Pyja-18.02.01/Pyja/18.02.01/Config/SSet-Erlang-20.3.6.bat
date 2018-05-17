@@ -1,0 +1,1 @@
+SET SC_ERLANG_HM=C:\QUCK\Erlang\x64\20.3.6\erl9.3
