@@ -69,8 +69,7 @@ var GC_JEP = ( function () {
   catch (bu2_ex) { throw "Cannot create Jep =>\n" + bu2_ex.message; }
   fu_it .eval ( "import sys" );
   fu_it .eval ( "sys.dont_write_bytecode = True" );
-  fu_it .set ( "GC_LOG_DEBUG", false )
-  fu_it .set  ( "JC_JEP", fu_it );
+  fu_it .set ( "JC_JEP", fu_it );
   var fu_jar_jn = gf_jn ( gf_jar_fn () );
   if ( fu_jar_jn == "ScriptRunner" ) {
     fu_it .set  ( "JC_BR", br );
@@ -81,6 +80,10 @@ var GC_JEP = ( function () {
   }
   return fu_it;
 } ) ();
+
+function gp_set_log_level_to_info () { GC_JEP .set ( "JC_LOG_INFO", true ) }
+function gp_set_log_level_to_debug () { GC_JEP .set ( "JC_LOG_INFO", false ) }
+gp_set_log_level_to_debug ();
 
 function gp_run_py (x_it) {
   var pu_fn = [ GC_PYJA_HM, "Program" ] .concat (x_it) .join (GC_FOSA)

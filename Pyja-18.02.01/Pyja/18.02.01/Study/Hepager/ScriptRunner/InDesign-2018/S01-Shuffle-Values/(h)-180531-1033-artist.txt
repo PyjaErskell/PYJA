@@ -1,0 +1,31 @@
+hu_sn_name
+01 Drake
+02 Michael Jackson
+03 Fifth Harmony
+04 Rihanna
+05 Dua Lipa
+06 Eurythmics
+07 Sia
+08 Pitbull
+09 Ed Sheeran
+10 Usher
+11 DJ Khaled
+12 Flo Rida
+13 Kevin Lyttle
+14 Nelly Furtado
+15 Estelle
+16 Miley Cyrus
+17 Macklemore
+18 Whitney Houston
+19 Kayne West
+20 Justin Bieber
+21 Gwen Stefani
+22 The Killers
+23 Queen & David Bowie
+24 Toploader
+25 Outkast
+26 Zara Larsson
+27 Madonna
+28 Backstreet Boys
+29 Blue Cantrell
+30 Clean Bandit

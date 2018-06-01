@@ -550,6 +550,8 @@ class DBody :
       pu_lst .append ( bu2_ln .split ("\t") [0] )
     JC_LOG .info ( f"Shuffling { len (pu_lst) } records ..." )
     random .shuffle (pu_lst)
+    if not JC_LOG_INFO : gp_log_array ( JC_LOG .debug, 'Shuffled records', pu_lst )
+    JC_LOG .info ( f"Creating shuffled records ..." )
     for bu2_it in pu_lst :
       bu2_ln = bu2_it + "\r\n"
       JC_BW .write ( bu2_ln, 0, len (bu2_ln) )
@@ -557,7 +559,7 @@ class DBody :
 class OStart :
   @classmethod
   def main (cls) :
-    if not GC_LOG_DEBUG : jp_set_log_level_to_info ()
+    if JC_LOG_INFO : jp_set_log_level_to_info ()
     DRun .dp_it ()
   
 OStart .main ()
