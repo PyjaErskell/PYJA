@@ -59,6 +59,7 @@ import logging
 import platform
 import psutil
 import shutil
+import signal
 import time
 import tkinter
 import traceback
@@ -305,6 +306,7 @@ class __DgExit : # (__)private mo(D)ule (g)lobal
   def dp_it ( cls, x_cx ) :
     GC_LOG .debug ( f'Received LgCx ({x_cx.lu_ec})' )
     if cls.__dav_was_lgcx_processed == False :
+      GC_QAPP .quit ()
       cls.__dav_was_lgcx_processed = True
       cls.__dav_cx = x_cx
       cls.__dap_before_exit ()
@@ -331,6 +333,8 @@ class __DgExit : # (__)private mo(D)ule (g)lobal
     elif pu_ec < 0 : os._exit (GC_EC_ERROR)
     else : os._exit (pu_ec)
 def gp_request_exit ( x_ec, x_ex_list = None ) : __DgExit .dp_it ( LgCx ( x_ec, x_ex_list ) )
+
+signal .signal ( signal.SIGINT, lambda x_signal, x_frame : gp_request_exit ( GC_EC_ERROR, [ 'SIGINT (ctrl+c)' ]) )
 
 #
 # Main Skeleton
@@ -439,6 +443,10 @@ class WMain (QMainWindow) :
     self .setCentralWidget (self.wu_cw)
     self .show ()
     self .raise_ ()
+  def closeEvent ( self, x_ev ) :
+    GC_LOG .info ( f'[{self.__class__.__name__}] closing ...' )
+    x_ev .accept ()
+    GC_QAPP .quit ()
 
 class DBody :
   @classmethod
