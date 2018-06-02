@@ -163,13 +163,15 @@ end
 }.()
 
 GC_GR = Java::JavaxScript::ScriptEngineManager.new .get_engine_by_name ('groovy')
-GC_GR .eval """
-  Object.metaClass.GC_EC_ERROR = #{GC_EC_ERROR}
-  Object.metaClass.GC_THIS_PID = #{GC_THIS_PID}
-"""
-def gy_gr_call x_fun_nm, *x_args; GC_GR .invoke_function x_fun_nm, *x_args; end
+def gy_ge x_str; GC_GR .eval x_str; end
+def gy_gf x_nm, *x_args; GC_GR. invoke_function x_nm, *x_args; end
+def gy_gm x_oj, x_nm, *x_args; GC_GR .invoke_method x_oj, x_nm, *x_args; end
+def gy_gc x_closure, *x_args
+  yu_closure = x_closure.kind_of?(String) ? gy_ge(x_closure) : x_closure
+  gy_gm yu_closure, 'call', *x_args
+end
 
-GC_GR .eval '''
+gy_ge '''
   Object.metaClass.__gau_jr = org.jruby.Ruby .getGlobalRuntime ()
   Object.metaClass.__gaf_java_to_jr = { final Object... x_java_oj_arr ->
     final fu_jr_oj_arr = new org.jruby.runtime.builtin.IRubyObject [x_java_oj_arr.length]
@@ -184,7 +186,7 @@ GC_GR .eval '''
   }
   def gp_fx_start ( final org.jruby.RubyProc x_block ) { Thread .start { __CgFxApp .csn_launch x_block } }
 '''
-def gp_fx_start &x_block; gy_gr_call 'gp_fx_start', x_block; end
+def gp_fx_start &x_block; gy_gf 'gp_fx_start', x_block; end
 def gp_xr &x_block; javafx.application.Platform.runLater { x_block .call }; end
 
 CgActorRef = Java::AkkaActor::ActorRef
@@ -192,7 +194,7 @@ CgAwait = Java::ScalaConcurrent::Await
 CgDuration = Java::ScalaConcurrentDuration::Duration
 CgString = Java::JavaLang::String
 
-GC_GR .eval <<-__GASH_EOS.unindent
+gy_ge <<-__GASH_EOS.unindent
   def __gaf_default_as ( final String x_as_nm ) {
     fu_lc = org.slf4j.LoggerFactory .getILoggerFactory ()
     final fu_jc = new ch.qos.logback.classic.joran.JoranConfigurator ()
@@ -204,7 +206,7 @@ GC_GR .eval <<-__GASH_EOS.unindent
         <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
           <layout class="ch.qos.logback.classic.PatternLayout">
             <Pattern>
-              [${ String.format ( '%06d', GC_THIS_PID ) },%.-1level,%date{yyMMdd-HHmmss}] %msg%n
+              [${ String.format ( '%06d', #{GC_THIS_PID} ) },%.-1level,%date{yyMMdd-HHmmss}] %msg%n
             </Pattern>
           </layout>
           <target>System.out</target>
@@ -236,10 +238,10 @@ GC_GR .eval <<-__GASH_EOS.unindent
   def gp_set_log_level_to_debug () { GC_AS .eventStream () .setLogLevel ( akka.event.Logging .DebugLevel () ) }
 __GASH_EOS
 
-GC_AS = gy_gr_call 'gf_as'
+GC_AS = gy_gf 'gf_as'
 GC_LOG = GC_AS.log
-def gp_set_log_level_to_info; gy_gr_call 'gp_set_log_level_to_info'; end
-def gp_set_log_level_to_debug; gy_gr_call 'gp_set_log_level_to_debug'; end
+def gp_set_log_level_to_info; gy_gf 'gp_set_log_level_to_info'; end
+def gp_set_log_level_to_debug; gy_gf 'gp_set_log_level_to_debug'; end
 
 def gf_jr &x_block
   Class.new {
@@ -339,7 +341,7 @@ def gp_register_on_termination
 end
 Java::JavaLang::Runtime .runtime .add_shutdown_hook gf_jt { gp_request_exit GC_EC_SHUTDOWN, ( Exception.new 'Shutdown occurred !!!' ) }
 
-GC_GR .eval <<-__GASH_EOS.unindent
+gy_ge <<-__GASH_EOS.unindent
   import com.trolltech.qt.core.QObject
   Object.metaClass.__gap_qr { final Closure xp_it -> com.trolltech.qt.core.QCoreApplication.invokeLater { xp_it () } }
   class __CgQtSlot0 extends QObject {
@@ -405,16 +407,16 @@ GC_GR .eval <<-__GASH_EOS.unindent
 __GASH_EOS
 def gp_qr &x_block; com.trolltech.qt.core.QCoreApplication.invokeLater { x_block .call }; end
 
-module TgQtSlot
+module TgQs # (Q)t (s)lot
   def tm_qt_slot &x_block
-    mu_it = gy_gr_call "gf_qs#{x_block.arity}", x_block
+    mu_it = gy_gf "gf_qs#{x_block.arity}", x_block
     ( @tu_qs_llos ||= [] ) << mu_it
     return mu_it
   end
 end
 
 class CgAt < Java::AkkaActor::AbstractActor # (a)c(t)or
-  include TgQtSlot
+  include TgQs
   def createReceive
     return ( receive_builder .match Java::JavaLang::Object .java_class, __gaf_ua { |it| receive it } ) .build
   end
@@ -544,9 +546,11 @@ class WAtFxMain < CgAt
       it .show
       it .to_front
     }
-    @wu_timer = QTimer.new.tap { |it|
-      it .timeout .connect *tm_qt_slot { wn_change_font nil }
-      it .start 45
+    gp_qr {
+      @wu_timer = QTimer.new.tap { |it|
+        it .timeout .connect *tm_qt_slot { gp_xr { wn_change_font nil } }
+        it .start 45
+      }
     }
   end
   def wn_change_font x_ev, x_tell = true
