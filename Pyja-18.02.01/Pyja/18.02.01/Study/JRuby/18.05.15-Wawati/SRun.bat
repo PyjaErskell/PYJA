@@ -16,7 +16,7 @@ POPD
 
 CALL "%SC_PYJA_HM%\Config\SSet-JDK-8.bat"
 CALL "%SC_PYJA_HM%\Config\SSet-JRuby-9.1.15.0.bat"
-CALL "%SC_PYJA_HM%\Config\SSet-QtJambi-4.8.6.bat"
+CALL "%SC_PYJA_HM%\Config\SSet-QtJambi-4.8.7.bat"
 
 SET JAVA_HOME=%SC_J8_HM%
 SET SC_JAVA_XMX=-Xmx9g
