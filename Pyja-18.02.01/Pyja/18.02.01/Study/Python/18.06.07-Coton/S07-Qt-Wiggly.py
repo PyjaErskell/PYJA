@@ -671,77 +671,74 @@ class DRun :
 # Your Source
 #
 
-CjFxButton = jf_jcls ('javafx.scene.control.Button')
-CjFxFont   = jf_jcls ('javafx.scene.text.Font')
-CjFxLabel  = jf_jcls ('javafx.scene.control.Label')
-CjFxPos    = jf_jcls ('javafx.geometry.Pos')
-CjFxScene  = jf_jcls ('javafx.scene.Scene')
-CjFxVBox   = jf_jcls ('javafx.scene.layout.VBox')
+from PyQt5.QtGui import QColor
+from PyQt5.QtGui import QFontMetrics
+from PyQt5.QtGui import QPainter
+from PyQt5.QtWidgets import QLineEdit
+from PyQt5.QtWidgets import QMainWindow
+from PyQt5.QtWidgets import QVBoxLayout
+from PyQt5.QtWidgets import QWidget
 
-class WAtFxMain ( CjAt, TgWai ) :
-  LNextFont = jf_gi ( 'class LNextFont {}' )
-  def __init__ (self) : super () .__init__ ()
-  def preStart (self) : self .wn_init ()
+class WWiggly (QWidget) :
+  WC_SINE_TBL = [ 0, 38, 71, 92, 100, 92, 71, 38, 0, -38, -71, -92, -100, -92, -71, -38 ]
+  def __init__ (self) :
+    super () .__init__ ()
+    self .wn_init ()
   def wn_init (self) :
-    JC_LOG .info ( self.tm_wai ('Initializing ...') )
-    self.wu_stage = JC_FX_STAGE
-    self.wu_root = CjFxVBox ()
-    self.wu_scene = CjFxScene ( self.wu_root, 650, 200 )
-    self.wu_stage .setTitle (GC_APP_NM)
-    self.wu_stage .setScene (self.wu_scene)
-    self.wu_bn = CjFxButton ()
-    self.wu_lb = CjFxLabel ()
-    self.wu_fnt_families = CjFxFont .getFamilies ()
-    self.wv_fnt_idx = self.wu_fnt_families .size () - 1
-    self.wv_msg = ''
-    self.wu_root .setAlignment (CjFxPos.CENTER)
-    self.wu_root .setSpacing (10)
-    self.wu_root .getChildren () .addAll ( [ self.wu_bn, self.wu_lb ] )
-    jy_gc ('''{ x_yi, x_bn ->
-      x_bn .onAction = { gp_yn x_yi, 'wn_change_font' }
-    }''', self.cu_yi, self.wu_bn )
-    jy_gc ('''{ x_yi, x_stage ->
-      x_stage .with {
-        onShowing = { gp_yn x_yi, 'wn_showing' }
-        onShown = { gp_yn x_yi, 'wn_shown' }
-        onCloseRequest = { gp_yn x_yi, 'wn_quit' }
-      }
-    }''', self.cu_yi, self.wu_stage )
-    self.wu_stage .show ()
-    self .wn_move_center ()
-    self .wn_change_font ()
-    self .startTimer (100)
-  def timerEvent ( self, x_ev ) : self .tell ( self .getSelf (), self.LNextFont () )
-  def receive ( self, x_letter, x_atr_sender ) :
-    nu_java_nm = x_letter.java_name
-    JC_LOG .debug ( self.tm_wai ( f'Received {nu_java_nm}' ) )
-    if ( nu_java_nm == 'LNextFont' ) : self. wn_change_font ()
-  def wn_change_font (self) :
-    nu_total = self.wu_fnt_families .size ()
-    if self.wv_fnt_idx >= nu_total : self.wv_fnt_idx = 0
-    nu_fnt_nm = self.wu_fnt_families .get (self.wv_fnt_idx)
-    if self.wv_msg != '' : JC_LOG .info ( f'[FX] {self.wv_msg}' )
-    nu_nt = f'({ self.wv_fnt_idx + 1 }/{nu_total})'
-    self.wv_msg = f'0^0 {nu_nt} {nu_fnt_nm}'
-    self.wu_bn .setText ( f"Say '{self.wv_msg}'" )
-    self.wu_bn .setStyle ( f"-fx-font-family : '{nu_fnt_nm}'; -fx-font-size : 17px;" )
-    self.wu_lb .setText ( f'{nu_nt} Font name : {nu_fnt_nm}' )
-    self.wv_fnt_idx += 1
-    self .wn_move_center ()
-  def wn_move_center (self) :
-    nu_cp = QDesktopWidget () .availableGeometry () .center () # center point
-    self.wu_stage .setX ( nu_cp .x () - self.wu_stage .getWidth () / 2 )
-    self.wu_stage .setY ( nu_cp .y () - self.wu_stage .getHeight () / 2 )
-  def wn_shown (self) : JC_LOG .info ( 'Stage shown ...' )
-  def wn_quit (self) :
-    JC_LOG .info ( self.tm_wai ( 'About to quit ...' ) )
+    nu_fnt = self .font ()
+    nu_fnt .setPointSize ( nu_fnt .pointSize () + 20 )
+    self .setFont (nu_fnt)
+    self.wv_step = 0
+    self .startTimer (60)
+  def timerEvent ( self, x_ev ) :
+    self.wv_step += 1
+    self .update ()
+  def paintEvent ( self, x_ev ) :
+    nu_metrics = QFontMetrics ( self .font () )
+    nv_x = int ( ( self .width () - nu_metrics .width (self.wv_text) ) / 2 )
+    nu_y = int ( ( self .height () + nu_metrics .ascent () - nu_metrics .descent () ) / 2 )
+    nu_color = QColor ()
+    nu_painter = QPainter ()
+    nu_painter .begin (self)
+    nu_tbl_sz = len (self.WC_SINE_TBL)
+    for bu2_i, bu2_ch in enumerate (self.wv_text) :
+      bu2_idx = ( self.wv_step + bu2_i ) % nu_tbl_sz
+      nu_color .setHsv ( ( nu_tbl_sz - 1 - bu2_idx ) * nu_tbl_sz, 255, 191 )
+      nu_painter .setPen (nu_color)
+      nu_painter .drawText ( nv_x, nu_y - int ( ( self.WC_SINE_TBL [bu2_idx] * nu_metrics .height () ) / 400 ), bu2_ch )
+      nv_x += nu_metrics .width (bu2_ch)
+    nu_painter .end ()
+  def won_set_text ( self, x_text ) :
+    JC_LOG .info ( f'Setting text => {x_text}' )
+    self.wv_text = x_text
+
+class WMain ( QMainWindow, TgWai ) :
+  def __init__ (self) :
+    super () .__init__ ()
+    self .wn_init ()
+  def wn_init (self) :
+    self .setWindowTitle (GC_APP_NM)
+    self .resize ( 460, 145 )
+    self.wu_cw = QWidget ()
+    self.wu_lo = QVBoxLayout ()
+    self.wu_wiggly = WWiggly ()
+    self.wu_le = QLineEdit ()
+    self.wu_le .textChanged .connect ( self.wu_wiggly.won_set_text )
+    self.wu_le .setText ('Hello Pyja !')
+    for bu2_it in [ self.wu_wiggly, self.wu_le ] : self.wu_lo .addWidget (bu2_it)
+    self.wu_cw .setLayout (self.wu_lo)
+    self .setCentralWidget (self.wu_cw)
+    self .show ()
+    self .raise_ ()
+  def closeEvent ( self, x_ev ) :
+    JC_LOG .info ( self.tm_wai ( 'Closing ...' ) )
     jp_request_exit (GC_EC_SUCCESS)
 
 class DBody :
   @classmethod
   def dp_it (cls) :
     GC_QAPP .setStyle ('fusion')
-    pu_atr_fx = jf_mk_atr ( WAtFxMain (), ':c' )
+    cls.du_w = WMain ()
 
 class OStart :
   @classmethod

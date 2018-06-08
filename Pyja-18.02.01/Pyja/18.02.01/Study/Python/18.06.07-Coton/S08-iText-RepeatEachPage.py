@@ -671,77 +671,287 @@ class DRun :
 # Your Source
 #
 
-CjFxButton = jf_jcls ('javafx.scene.control.Button')
-CjFxFont   = jf_jcls ('javafx.scene.text.Font')
-CjFxLabel  = jf_jcls ('javafx.scene.control.Label')
-CjFxPos    = jf_jcls ('javafx.geometry.Pos')
-CjFxScene  = jf_jcls ('javafx.scene.Scene')
-CjFxVBox   = jf_jcls ('javafx.scene.layout.VBox')
+for bu2_jar_fn in [
+  gf_pj ( GC_PYJA_HM, 'Library', 'iText', '7.1.0', 'io-7.1.0.jar' ),
+  gf_pj ( GC_PYJA_HM, 'Library', 'iText', '7.1.0', 'kernel-7.1.0.jar' ),
+  gf_pj ( GC_PYJA_HM, 'Library', 'SLF4J', '1.7.25', 'slf4j-api-1.7.25.jar' ),
+] : jp_add_jar (bu2_jar_fn)
 
-class WAtFxMain ( CjAt, TgWai ) :
-  LNextFont = jf_gi ( 'class LNextFont {}' )
-  def __init__ (self) : super () .__init__ ()
-  def preStart (self) : self .wn_init ()
+CjPageSize    = jf_jcls ('com.itextpdf.kernel.geom.PageSize')
+CjPdfCanvas   = jf_jcls ('com.itextpdf.kernel.pdf.canvas.PdfCanvas')
+CjPdfDocument = jf_jcls ('com.itextpdf.kernel.pdf.PdfDocument')
+CjPdfReader   = jf_jcls ('com.itextpdf.kernel.pdf.PdfReader')
+CjPdfWriter   = jf_jcls ('com.itextpdf.kernel.pdf.PdfWriter')
+
+from PyQt5.QtCore import QRect
+from PyQt5.QtGui import QFontDatabase
+from PyQt5.QtGui import QTextOption
+from PyQt5.QtWidgets import QFileDialog
+from PyQt5.QtWidgets import QFrame
+from PyQt5.QtWidgets import QGridLayout
+from PyQt5.QtWidgets import QHBoxLayout
+from PyQt5.QtWidgets import QLabel
+from PyQt5.QtWidgets import QLineEdit
+from PyQt5.QtWidgets import QMainWindow
+from PyQt5.QtWidgets import QMessageBox
+from PyQt5.QtWidgets import QProgressBar
+from PyQt5.QtWidgets import QPushButton
+from PyQt5.QtWidgets import QSizePolicy
+from PyQt5.QtWidgets import QSpacerItem
+from PyQt5.QtWidgets import QSpinBox
+from PyQt5.QtWidgets import QTextEdit
+from PyQt5.QtWidgets import QWidget
+
+class WMain ( QMainWindow, TgWai ) :
+  def __init__ (self) :
+    super () .__init__ ()
+    self .wn_init ()
   def wn_init (self) :
     JC_LOG .info ( self.tm_wai ('Initializing ...') )
-    self.wu_stage = JC_FX_STAGE
-    self.wu_root = CjFxVBox ()
-    self.wu_scene = CjFxScene ( self.wu_root, 650, 200 )
-    self.wu_stage .setTitle (GC_APP_NM)
-    self.wu_stage .setScene (self.wu_scene)
-    self.wu_bn = CjFxButton ()
-    self.wu_lb = CjFxLabel ()
-    self.wu_fnt_families = CjFxFont .getFamilies ()
-    self.wv_fnt_idx = self.wu_fnt_families .size () - 1
-    self.wv_msg = ''
-    self.wu_root .setAlignment (CjFxPos.CENTER)
-    self.wu_root .setSpacing (10)
-    self.wu_root .getChildren () .addAll ( [ self.wu_bn, self.wu_lb ] )
-    jy_gc ('''{ x_yi, x_bn ->
-      x_bn .onAction = { gp_yn x_yi, 'wn_change_font' }
-    }''', self.cu_yi, self.wu_bn )
-    jy_gc ('''{ x_yi, x_stage ->
-      x_stage .with {
-        onShowing = { gp_yn x_yi, 'wn_showing' }
-        onShown = { gp_yn x_yi, 'wn_shown' }
-        onCloseRequest = { gp_yn x_yi, 'wn_quit' }
-      }
-    }''', self.cu_yi, self.wu_stage )
-    self.wu_stage .show ()
-    self .wn_move_center ()
-    self .wn_change_font ()
-    self .startTimer (100)
-  def timerEvent ( self, x_ev ) : self .tell ( self .getSelf (), self.LNextFont () )
-  def receive ( self, x_letter, x_atr_sender ) :
-    nu_java_nm = x_letter.java_name
-    JC_LOG .debug ( self.tm_wai ( f'Received {nu_java_nm}' ) )
-    if ( nu_java_nm == 'LNextFont' ) : self. wn_change_font ()
-  def wn_change_font (self) :
-    nu_total = self.wu_fnt_families .size ()
-    if self.wv_fnt_idx >= nu_total : self.wv_fnt_idx = 0
-    nu_fnt_nm = self.wu_fnt_families .get (self.wv_fnt_idx)
-    if self.wv_msg != '' : JC_LOG .info ( f'[FX] {self.wv_msg}' )
-    nu_nt = f'({ self.wv_fnt_idx + 1 }/{nu_total})'
-    self.wv_msg = f'0^0 {nu_nt} {nu_fnt_nm}'
-    self.wu_bn .setText ( f"Say '{self.wv_msg}'" )
-    self.wu_bn .setStyle ( f"-fx-font-family : '{nu_fnt_nm}'; -fx-font-size : 17px;" )
-    self.wu_lb .setText ( f'{nu_nt} Font name : {nu_fnt_nm}' )
-    self.wv_fnt_idx += 1
-    self .wn_move_center ()
-  def wn_move_center (self) :
-    nu_cp = QDesktopWidget () .availableGeometry () .center () # center point
-    self.wu_stage .setX ( nu_cp .x () - self.wu_stage .getWidth () / 2 )
-    self.wu_stage .setY ( nu_cp .y () - self.wu_stage .getHeight () / 2 )
-  def wn_shown (self) : JC_LOG .info ( 'Stage shown ...' )
-  def wn_quit (self) :
-    JC_LOG .info ( self.tm_wai ( 'About to quit ...' ) )
+
+    self.wv_i_nop = 0
+
+    self .setWindowTitle (GC_APP_NM)
+    self .resize ( 460, 145 )
+
+    self.wu_cw = QWidget ()
+    self.wu_lo = QGridLayout ()
+    self.wu_cw .setLayout (self.wu_lo)
+    self .setCentralWidget (self.wu_cw)
+
+    def nf2_new_le () :
+      fu2_le = QLineEdit ()
+      fu2_le .setMinimumWidth (700)
+      fu2_le .setAlignment (Qt.AlignLeft)
+      fu2_le .setReadOnly (True)
+      return fu2_le
+
+    def nf2_ui_add_input (x_row) :
+      fv2_row = x_row
+      self.wu_lb_i_pn = QLabel ('Input path')
+      self.wu_le_i_pn = nf2_new_le ()
+      self.wu_le_i_pn .setText ( QStandardPaths .writableLocation (QStandardPaths.DesktopLocation) )
+      self.wu_pb_i_fn = QPushButton ('…')
+      self.wu_pb_i_fn .setMaximumWidth (25)
+      self.wu_lb_i_bn = QLabel ('Input base name')
+      self.wu_le_i_bn = nf2_new_le ()
+      self.wu_lb_i_nfo = QLabel ('Input file info')
+      self.wu_le_i_nfo = nf2_new_le ()
+      self.wu_lo .addWidget ( self.wu_lb_i_pn, fv2_row, 0, 1, 1, Qt.AlignRight )
+      self.wu_lo .addWidget ( self.wu_le_i_pn, fv2_row, 1, 1, 3 )
+      self.wu_lo .addWidget ( self.wu_pb_i_fn, fv2_row, 4, 2, 1 )
+      fv2_row += 1
+      self.wu_lo .addWidget ( self.wu_lb_i_bn, fv2_row, 0, 1, 1, Qt.AlignRight )
+      self.wu_lo .addWidget ( self.wu_le_i_bn, fv2_row, 1, 1, 3 )
+      fv2_row += 1
+      self.wu_lo .addWidget ( self.wu_lb_i_nfo, fv2_row, 0, 1, 1, Qt.AlignRight )
+      self.wu_lo .addWidget ( self.wu_le_i_nfo, fv2_row, 1, 1, -1 )
+      return fv2_row
+
+    def nf2_ui_add_hor_ln (x_row) :
+      fv2_row = x_row
+      fu2_fm = QFrame ()
+      fu2_fm .setGeometry ( QRect ( 1, 1, 1, 1 ) )
+      fu2_fm .setFrameShape (QFrame.HLine)
+      fu2_fm .setFrameShadow (QFrame.Sunken)
+      self.wu_lo .addWidget ( fu2_fm, fv2_row, 0, 1, -1 )
+      return fv2_row
+
+    def nf2_ui_add_config (x_row) :
+      fv2_row = x_row
+      self.wu_lb_cfg = QLabel ('Setup')
+      self.wu_hbl_cfg = QHBoxLayout ()
+      self.wu_hbl_cfg .setSpacing (1)
+      def ff3_new_sb_repeat () :
+        fu3_sb = QSpinBox ()
+        fu3_sb .setMinimum (2)
+        fu3_sb .setMaximum (100_000)
+        fu3_sb .setValue ( fu3_sb .minimum () )
+        fu3_sb .setPrefix ( 'repeat each page ')
+        fu3_sb .setSuffix ( ' times')
+        fu3_sb .setSingleStep (1)
+        fu3_sb .setAlignment (Qt.AlignRight)
+        return fu3_sb
+      self.wu_sb_repeat = ff3_new_sb_repeat ()
+      self.wu_hbl_cfg .addWidget (self.wu_sb_repeat)
+      self.wu_hbl_cfg .addItem ( QSpacerItem ( 1, 1, QSizePolicy.Expanding, QSizePolicy.Minimum ) )
+      self.wu_lo .addWidget ( self.wu_lb_cfg, fv2_row, 0, 1, 1, Qt.AlignRight )
+      self.wu_lo .addLayout ( self.wu_hbl_cfg, fv2_row, 1, 1, -1 )
+      return fv2_row
+
+    def nf2_ui_add_output (x_row) :
+      fv2_row = x_row
+      self.wu_lb_o_pn = QLabel ('Output path')
+      self.wu_le_o_pn = nf2_new_le ()
+      self.wu_le_o_pn .setText ( gf_pj ( QStandardPaths .writableLocation (QStandardPaths.DownloadLocation), 'TMPS' ) )
+      self.wu_lo .addWidget ( self.wu_lb_o_pn, fv2_row, 0, 1, 1, Qt.AlignRight )
+      self.wu_lo .addWidget ( self.wu_le_o_pn, fv2_row, 1, 1, -1 )
+      self.wu_lb_o_bn = QLabel ('Output base name')
+      self.wu_le_o_bn = nf2_new_le ()
+      self.wu_lb_o_nfo = QLabel ('Output file info')
+      self.wu_le_o_nfo = nf2_new_le ()
+      fv2_row += 1
+      self.wu_lo .addWidget ( self.wu_lb_o_bn, fv2_row, 0, 1, 1, Qt.AlignRight )
+      self.wu_lo .addWidget ( self.wu_le_o_bn, fv2_row, 1, 1, -1 )
+      fv2_row += 1
+      self.wu_lo .addWidget ( self.wu_lb_o_nfo, fv2_row, 0, 1, 1, Qt.AlignRight )
+      self.wu_lo .addWidget ( self.wu_le_o_nfo, fv2_row, 1, 1, -1 )
+      return fv2_row
+
+    def nf2_ui_add_process (x_row) :
+      fv2_row = x_row
+      self.wu_lb_process = QLabel ('Process')
+      self.wu_pgb = QProgressBar ()
+      self.wu_pgb .setMinimum (0)
+      self.wu_pgb .setAlignment (Qt.AlignCenter)
+      self.wu_pb_do = QPushButton ('Do')
+      self.wu_pb_do .setMaximumWidth (80)
+      self.wu_pb_do .setEnabled (False)
+      self.wu_te_log = QTextEdit ()
+      self.wu_te_log .setFont ( QFontDatabase .systemFont (QFontDatabase.FixedFont) )
+      self.wu_te_log .setReadOnly (True)
+      self.wu_te_log .setWordWrapMode (QTextOption.NoWrap)
+      self.wu_te_log .setMinimumHeight (250)
+      self.wu_lo .addWidget ( self.wu_lb_process, fv2_row, 0, 1, 1, Qt.AlignRight )
+      self.wu_lo .addWidget ( self.wu_pgb, fv2_row, 1, 1, 2 )
+      self.wu_lo .addWidget ( self.wu_pb_do, fv2_row, 3, 1, -1, Qt.AlignCenter )
+      fv2_row += 1
+      self.wu_lo .addWidget ( self.wu_te_log, fv2_row, 1, 1, -1 )
+      return fv2_row
+
+    nv_row = 0
+    nv_row = nf2_ui_add_input   (nv_row) + 1
+    nv_row = nf2_ui_add_hor_ln  (nv_row) + 1
+    nv_row = nf2_ui_add_config  (nv_row) + 1
+    nv_row = nf2_ui_add_hor_ln  (nv_row) + 1
+    nv_row = nf2_ui_add_output  (nv_row) + 1
+    nv_row = nf2_ui_add_hor_ln  (nv_row) + 1
+    nv_row = nf2_ui_add_process (nv_row) + 1
+
+    self.wu_lo .setColumnStretch ( 1, 1 )
+    self.wu_pb_i_fn.clicked .connect (self.wn_pb_i_fn_clicked)
+    self.wu_sb_repeat.valueChanged .connect (self.wn_sb_repeat_value_changed)
+    self.wu_pb_do.clicked .connect (self.wn_pb_do_clicked)
+
+    def pp2_move_center () :
+      pu2_cp = QDesktopWidget () .availableGeometry () .center ()
+      pu2_fg = self .frameGeometry ()
+      pu2_fg .moveCenter (pu2_cp)
+      self .move ( pu2_fg .topLeft () )
+
+    self .show ()
+    pp2_move_center ()
+    self .raise_ ()
+  def wn_pb_i_fn_clicked (self) :
+    def np2_do () :
+      pu2_i_fn = QFileDialog .getOpenFileName ( self, 'Select PDF file', self.wu_le_i_pn .text (), 'PDF file (*.pdf)' ) [0]
+      if not gf_if (pu2_i_fn) : return
+      self .wn_log_clear ()
+      self .wn_log_info ( f'Requested file => {pu2_i_fn}' )
+      self .wn_log_info ( 'Getting total pages of the requested file ...' )
+      self.wu_le_i_pn .setText ( gf_pn (pu2_i_fn) )
+      self.wv_i_nop = self .wm_pdf_nop (pu2_i_fn)
+      self.wu_le_i_bn .setText ( gf_bn (pu2_i_fn) )
+      self .wn_log_info ( f"Total pages of the requested file => {self.wv_i_nop:,d}" )
+      self.wu_le_i_nfo .setText ( f'{self.wv_i_nop:,d} page(s)' )
+      self .wn_sb_repeat_value_changed ()
+    try : np2_do ()
+    except :
+      gp_log_exception ( self.wn_log_error, 'Following error occurs !!!', gf_exception_to_list (), 30 )
+      self.wn_log_error ( 'Check your PDF file or this program logic !!!' )
+  def wn_sb_repeat_value_changed (self) :
+    if self.wv_i_nop < 1 : return
+    nu_i_nop = self.wv_i_nop
+    nu_repeat = self.wu_sb_repeat .value ()
+    nu_o_nop = nu_i_nop * nu_repeat
+    self.wu_le_o_bn .setText ( f'{ gf_jn ( self.wu_le_i_bn .text () ) }-(RepeatEachPage)-({nu_i_nop:d}ⅹ{nu_repeat:d})-{nu_o_nop:d}-pages.pdf' )
+    self.wu_le_o_nfo .setText ( f'( {nu_i_nop:,d} ⅹ {nu_repeat:,d} ) => {nu_o_nop:,d} pages' )
+    self.wu_pb_do .setEnabled (True)
+  def wn_pb_do_clicked (self) :
+    nu_st = datetime.now ()
+    nv_cancelled = False
+    gp_log_header ( self.wn_log_info, 'Start processing ...', 23 )
+    def np2_do () :
+      pu2_w_lst = [ self.wu_pb_i_fn, self.wu_sb_repeat, self.wu_pb_do ]
+      def pp3_set_enabled (x3_bool) :
+        for bu4_w in pu2_w_lst : bu4_w .setEnabled (x3_bool)
+      try :
+        pp3_set_enabled (False)
+        bu3_o_fn = gf_pj ( self .wu_le_o_pn .text (), self.wu_le_o_bn .text () )
+        self .wn_log_info ( f'Output path => { gf_pn (bu3_o_fn) }' )
+        self .wn_log_info ( f'Base name to generate => { gf_bn (bu3_o_fn) }' )
+        if gf_if (bu3_o_fn) :
+          self .wn_log_warn ( f'Oputput file is already exist in { gf_pn (bu3_o_fn) }' )
+          bu4_overwrite = QMessageBox .question ( self, GC_APP_NM, 'Overwrite ?' )
+          if bu4_overwrite == QMessageBox.No :
+            nonlocal nv_cancelled
+            nv_cancelled = True
+            return
+        JC_LOG .info ( 'Make output path if not exist ...' )
+        gp_mp ( gf_pn (bu3_o_fn) )
+        bu3_i_nop = self.wv_i_nop
+        bu3_repeat = self.wu_sb_repeat .value ()
+        bu3_o_nop = bu3_i_nop * bu3_repeat
+        JC_LOG .info ( f'Initializing progress bar ...' )
+        self.wu_pgb .setMaximum (bu3_o_nop)
+        self.wu_pgb .setValue (0)
+        try :
+          self .wn_log_info ( 'Opening input file ...')
+          bu4_i_doc = CjPdfDocument ( CjPdfReader ( gf_pj ( self .wu_le_i_pn .text (), self.wu_le_i_bn .text () ) ) )
+          self .wn_log_info ( 'Opening output file ...')
+          self .wn_log_info ( 'Writing output file ( may take a long time ) ...')
+          bu4_o_doc = CjPdfDocument ( CjPdfWriter (bu3_o_fn) .setSmartMode (True) )
+          bv4_o_nop_so_far = 0
+          for bu5_i_pg_no in range ( 1, bu3_i_nop+1 ) :
+            bu5_i_pg = bu4_i_doc .getPage (bu5_i_pg_no)
+            bu5_i_pg_sz = bu5_i_pg .getPageSize ()
+            bu5_o_pg_cp = bu5_i_pg .copyAsFormXObject (bu4_o_doc)
+            for _ in range (bu3_repeat) :
+              bu6_o_pg = bu4_o_doc .addNewPage ( CjPageSize (bu5_i_pg_sz) )
+              CjPdfCanvas (bu6_o_pg) .addXObject ( bu5_o_pg_cp, 0, 0 )
+            bv4_o_nop_so_far += bu3_repeat
+            self.wu_pgb .setValue (bv4_o_nop_so_far)
+            GC_QAPP .processEvents ()
+        finally :
+          bu4_o_doc .close ()
+          bu4_i_doc .close ()
+      finally : pp3_set_enabled (True)
+    try : np2_do ()
+    except :
+      gp_log_exception ( self.wn_log_error, 'Following error occurs !!!', gf_exception_to_list (), 30 )
+      self.wn_log_error ( 'Check your PDF file or this program logic !!!' )
+    else :
+      if nv_cancelled : self .wn_log_warn ( f'Cancelled by user !!!' )
+      else : self .wn_log_info ( 'Done processing => elapsed {} ...' .format ( datetime.now () - nu_st ) )
+  def wm_pdf_nop ( self, x_fn ) : # (n)umber (o)f (p)ages
+    mu_doc = CjPdfDocument ( CjPdfReader (x_fn) )
+    mu_nop = mu_doc .getNumberOfPages ()
+    mu_doc .close ()
+    return mu_nop
+  def wn_log_clear (self) : self.wu_te_log .clear ()
+  def wn_log_info ( self, x_msg ) :
+    JC_LOG .info (x_msg)
+    self.wu_te_log .append ( f"<font color=black>[I] { self. wm_2_html (x_msg) }</font>" )
+  def wn_log_warn ( self, x_msg ) :
+    JC_LOG .warn (x_msg)
+    self.wu_te_log .append ( f"<font color=magenta>[W] { self. wm_2_html (x_msg) }</font>" )
+  def wn_log_error ( self, x_msg ) :
+    JC_LOG .error (x_msg)
+    self.wu_te_log .append ( f"<font color=red>[E] { self. wm_2_html (x_msg) }</font>" )
+  def wm_2_html ( self, x_msg ) :
+    nv_msg = re.sub ( r'(?:\r\n|\r|\n)', '<br>', x_msg )
+    return nv_msg .replace ( ' ', '&nbsp;' )
+  def __del__ (self) : self .wn_fini ()
+  def wn_fini (self) : JC_LOG .info ( self.tm_wai ('Finalizing ...') )
+  def closeEvent ( self, x_ev ) :
+    JC_LOG .info ( self.tm_wai ( 'Closing ...' ) )
     jp_request_exit (GC_EC_SUCCESS)
 
 class DBody :
   @classmethod
   def dp_it (cls) :
     GC_QAPP .setStyle ('fusion')
-    pu_atr_fx = jf_mk_atr ( WAtFxMain (), ':c' )
+    cls.du_w = WMain ()
 
 class OStart :
   @classmethod

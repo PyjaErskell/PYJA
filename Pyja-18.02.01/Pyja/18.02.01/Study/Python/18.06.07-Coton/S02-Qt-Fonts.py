@@ -267,12 +267,6 @@ def gf_to_phs (x_pn) : # to (p)yja (h)ome (s)ymbol
 def gf_to_mps (x_pn) : # to (m)ilo (p)ath (s)ymbol
   return gf_replace_with_px_symbol ( x_pn, GC_MILO_PN, GC_MILO_PN_SYM )
 
-def gf_list_of_this_memory_maps_so_far () :
-  fu_mm = gf_process (GC_THIS_PID) .memory_maps ()
-  fu_it = list ( map ( lambda bx2_it : bx2_it.path, fu_mm ) )
-  fu_it .sort ()
-  return fu_it
-
 def gp_log_array ( xp_out, x_title, x_array ) :
   if x_title is not None : xp_out ( '{} :'.format ( x_title ) )
   for bu2_idx, bu2_it in enumerate ( x_array, start = 1 ) : xp_out ( '  {:2d} => {}' .format ( bu2_idx, bu2_it ) )
@@ -283,11 +277,17 @@ def gp_log_header ( xp_out, x_header, x_line_width ) :
   xp_out ( '+' + '-' * x_line_width )
   xp_out ( ': {}' .format (x_header) )
   xp_out ( '+' + '-' * x_line_width )
-def gp_log_exception ( xp_out, x_title, x_ex_list, x_header_line_width ) :
-  if type(x_ex_list) is not list : gp_log_header ( xp_out, 'List of reasons is not given !!!', x_header_line_width )
-  else :
+def gp_log_exception ( xp_out, x_title, x_ex, x_header_line_width ) :
+  pu_type = type(x_ex)
+  if pu_type is str : 
     gp_log_header ( xp_out, x_title, x_header_line_width )
-    xp_out ( "\n" .join (x_ex_list) )
+    xp_out (x_ex)
+  elif pu_type is list :
+    gp_log_header ( xp_out, x_title, x_header_line_width )
+    xp_out ( "\n" .join (x_ex) )
+  else :
+    gp_log_header ( xp_out, f'Invalid exception type !!!', x_header_line_width )
+    xp_out (f'{x_ex}')
 
 class __DgLongLiveObjects :
   __dau_it = {}
@@ -323,19 +323,6 @@ def gp_yn ( x_yi, x_nethod_nm, *x_args ) : # from p(y)thon id, call (n)ethod
   pu_yo = gf_yo (x_yi)
   if hasattr ( pu_yo, x_nethod_nm ) : getattr ( pu_yo, x_nethod_nm ) (*x_args)
 
-def __gaf_root_logger ( x_level, x_handler, x_format, x_datefmt = '%y%m%d-%H%M%S' ) :
-  fu_root = logging.root
-  fu_root.handlers = []
-  fu_root.setLevel (x_level)
-  if x_handler is not None :
-    x_handler.setFormatter ( logging.Formatter ( x_format, datefmt = x_datefmt ) )
-    fu_root.addHandler (x_handler)
-  return fu_root
-GC_LOG = __gaf_root_logger ( logging.DEBUG, logging.StreamHandler (sys.stdout), '[%(process)06d,%(levelname)-.1s,%(asctime)s] %(message)s' )
-def gp_set_log_level_to_info () : GC_LOG .setLevel (logging.INFO)
-def gp_set_log_level_to_debug () : GC_LOG .setLevel (logging.DEBUG)
-def gf_is_debug () : return GC_LOG .isEnabledFor ( logging.DEBUG )
-
 def gf_wai ( x_msg = None ) :
   fu_frame = sys._getframe().f_back
   fu_module_nm = fu_frame.f_globals ['__name__']
@@ -360,41 +347,11 @@ class TgWai : # (T)rait (g)lobal
   def tm_wai ( self, x_msg = None ) : return self.__class__.__tasm_wai ( self.__class__.__qualname__, x_msg ) # tm -> (t)rait public instance (m)ethod
 
 LgCx = namedtuple ( 'LgCx', [ 'lu_ec', 'lu_ex' ] )
-class __DgExit : # (__)private mo(D)ule (g)lobal
-  __dav_cx = LgCx ( GC_EC_NONE, None )
-  __dav_was_lgcx_processed = False
-  @classmethod
-  def dp_it ( cls, x_cx ) :
-    GC_LOG .debug ( f'Received LgCx ({x_cx.lu_ec})' )
-    if cls.__dav_was_lgcx_processed == False :
-      cls.__dav_was_lgcx_processed = True
-      cls.__dav_cx = x_cx
-      cls.__dap_before_exit ()
-      cls.__dap_exit ()
-  @classmethod
-  def __dap_before_exit (cls) :
-    pu_ec = cls.__dav_cx.lu_ec
-    pu_ex = cls.__dav_cx.lu_ex
-    if pu_ec != GC_EC_SUCCESS or pu_ex is not None :
-      if gf_is_debug () : gp_log_array ( GC_LOG .debug, 'Files of this memory maps', gf_list_of_this_memory_maps_so_far () )
-      gp_log_array ( GC_LOG .info,  'Python search paths', sys.path )
-    if pu_ex is not None : gp_log_exception ( GC_LOG .error, 'Following error occurs !!!', pu_ex, 60 )
-    if pu_ec != GC_EC_SUCCESS and pu_ex is None : gp_log_header ( GC_LOG .error, 'Unknown error occurs !!!', 60 )
-    if pu_ec == GC_EC_NONE : GC_LOG .error ( 'Undefined exit code (GC_EC_NONE), check your logic !!!' )
-    elif pu_ec == GC_EC_SHUTDOWN : GC_LOG .info ( 'Exit code from shutdown like ctrl+c, ...' )
-    elif pu_ec < 0 : GC_LOG .error ( f'Negative exit code ({pu_ec}), should consider using a positive value !!!' )
-    else : GC_LOG .info ( 'Exit code => {}' .format (pu_ec) )
-    GC_LOG .info ( 'Elapsed {} ...' .format ( datetime.now () - GC_ST ) )
-  @classmethod
-  def __dap_exit (cls) :
-    pu_ec = cls.__dav_cx.lu_ec
-    if pu_ec == GC_EC_NONE : os._exit (GC_EC_ERROR)
-    elif pu_ec == GC_EC_SHUTDOWN : pass
-    elif pu_ec < 0 : os._exit (GC_EC_ERROR)
-    else : os._exit (pu_ec)
 
 class CgQo (QObject) :
-  def __init__ (self) : super () .__init__ ()
+  def __init__ (self) :
+    super () .__init__ ()
+    self.cu_yi = gf_yi (self)
 
 #
 # Java (Global)
@@ -407,12 +364,14 @@ JC_GR .put ( 'GC_JEP', JC_JEP )
 
 def jy_ge (x_str) : return JC_GR .eval (x_str)
 jy_ge (f'''
+  GC_APP_NM      = '{GC_APP_NM}'
+  GC_EC_NONE     = {GC_EC_NONE}
   GC_EC_SHUTDOWN = {GC_EC_SHUTDOWN}
+  GC_EC_SUCCESS  = {GC_EC_SUCCESS}
+  GC_EC_ERROR    = {GC_EC_ERROR}
+  GC_THIS_PID    = {GC_THIS_PID}
 ''')
 jy_ge ('''
-  gf_ga = { final Object x_oj, final String x_attr_nm -> // get attribute of groovy object
-    x_oj.metaClass.getAttribute x_oj, x_attr_nm
-  }
   gf_jcls = { final String x_cls_nm -> return Class.forName (x_cls_nm) }
   gp_add_jar = { final String x_jar_fn ->
     if ( ! new File (x_jar_fn) .exists () ) { throw new FileNotFoundException ( "JAR file not found => ${x_jar_fn}" ) }
@@ -422,10 +381,17 @@ jy_ge ('''
     fu_m.setAccessible true
     fu_m.invoke pu_cl, pu_url
   }
-  Object.metaClass.gp_sr = { final Closure xp_it -> javax.swing.SwingUtilities .invokeLater { xp_it () } } // (S)wing (r)un
-  Object.metaClass.gp_xr = { final Closure xp_it -> javafx.application.Platform .runLater { xp_it () } } // JavaF(x) (r)un
-  Object.metaClass.gp_cy = { final String x_fun_nm, final Object... x_args -> GC_JEP .invoke ( x_fun_nm, *x_args ) } // (c)all p(y)thon
-  Object.metaClass.gp_yn = { final long x_yi, final String x_nethod_nm, final Object... x_args -> gp_cy ( 'gp_yn', x_yi, x_nethod_nm, *x_args ) }
+  gp_sr = { final Closure xp_it -> // (S)wing (r)un
+    javax.swing.SwingUtilities .invokeLater { xp_it () }
+  } 
+  gp_xr = { final Closure xp_it -> // JavaF(x) (r)un
+    javafx.application.Platform .runLater { xp_it () }
+  }
+  gp_cy = { final String x_fun_nm, final Object... x_args -> GC_JEP .invoke ( x_fun_nm, *x_args ) } // (c)all p(y)thon
+  gp_yn = { final long x_yi, final String x_nethod_nm, final Object... x_args -> gp_cy ( 'gp_yn', x_yi, x_nethod_nm, *x_args ) }
+  gf_is_fat = { return javafx.application.Platform .isFxApplicationThread () }
+  Object.metaClass.gp_xr = gp_xr
+  Object.metaClass.gp_yn = gp_yn
 ''')
 def jf_jarray (x_py_list) :
   fu_arr_sz = len (x_py_list)
@@ -437,7 +403,6 @@ def jy_gm ( x_oj, x_nm, *x_args ) : return JC_GR. invokeMethod ( x_oj, x_nm, jf_
 def jy_gc ( x_closure, *x_args ) :
   yu_closure = jy_ge (x_closure) if type(x_closure) is str else x_closure
   return jy_gm ( yu_closure, 'call', *x_args )
-def jf_ga ( x_oj, x_attr_nm ) : return jy_gf ( 'gf_ga', x_oj, x_attr_nm ) # (g)roovy (a)ttribute
 def jf_gi (x_cls) : return jy_ge ( f'@groovy.transform.Immutable {x_cls}' ) # (g)roovy (i)mmutable class
 def jf_jcls (x_cls_nm) : return jy_gf ( 'gf_jcls', x_cls_nm )
 def jp_add_jar (x_jar_fn) : jy_gf ( 'gp_add_jar', x_jar_fn )
@@ -446,7 +411,91 @@ for bu2_jar_fn in [
   gf_pj ( GC_PYJA_HM, 'Library', 'Akka', '2.5.9', 'akka-actor_2.12-2.5.9.jar' ),
   gf_pj ( GC_PYJA_HM, 'Library', 'Akka', '2.5.9', 'config-1.3.2.jar' ),
   gf_pj ( GC_PYJA_HM, 'Library', 'Akka', '2.5.9', 'scala-library.jar' ),
+  gf_pj ( GC_PYJA_HM, 'Library', 'Logback', '1.2.3', 'logback-classic-1.2.3.jar' ),
+  gf_pj ( GC_PYJA_HM, 'Library', 'Logback', '1.2.3', 'logback-core-1.2.3.jar' ),
+  gf_pj ( GC_PYJA_HM, 'Library', 'SLF4J', '1.7.25', 'slf4j-api-1.7.25.jar' ),
 ] : jp_add_jar (bu2_jar_fn)
+
+jy_ge ('''
+  GC_LOG = org.slf4j.LoggerFactory .getILoggerFactory () .with { bx2_lc ->
+    reset ()
+    getLogger ("GC_LOG") .with { bx3_log ->
+      addAppender ( new ch.qos.logback.core.ConsoleAppender () .with { bx4_ca ->
+        setContext (bx2_lc)
+        setEncoder ( new ch.qos.logback.classic.encoder.PatternLayoutEncoder () .with {
+          setContext (bx2_lc)
+          setPattern ( "[${ String.format ( '%06d', GC_THIS_PID ) },%.-1level,%date{yyMMdd-HHmmss}] %msg%n" )
+          start ()
+          it
+        } )
+        start ()
+        bx4_ca
+      } )
+      bx3_log
+    }
+  }
+  gp_set_log_level_to_info  = { GC_LOG.level = ch.qos.logback.classic.Level.INFO }
+  gp_set_log_level_to_warn  = { GC_LOG.level = ch.qos.logback.classic.Level.WARN }
+  gp_set_log_level_to_debug = { GC_LOG.level = ch.qos.logback.classic.Level.DEBUG }
+  gp_set_log_level_to_trace = { GC_LOG.level = ch.qos.logback.classic.Level.TRACE }
+  gp_set_log_level_to_debug ()
+  gp_log_array = { final xp_out = GC_LOG.&info, final x_title, final x_array ->
+    xp_out "${x_title} => "
+    x_array.eachWithIndex { final bx2_it, final bx2_idx -> xp_out "  ${ (bx2_idx+1) .toString() .padLeft(2) } : $bx2_it" }
+  }
+  gp_log_header = { final xp_out = GC_LOG.&info, final x_header, final x_line_width = 60 ->
+    xp_out '+' + '-' * x_line_width
+    xp_out ": ${x_header}"
+    xp_out '+' + '-' * x_line_width
+  }
+  gp_log_exception = { final xp_out = GC_LOG.&error, final x_title, final x_ex ->
+    gp_log_header xp_out, x_title
+    x_ex .each { xp_out "  ${it}" }
+  }
+  Object.metaClass.GC_LOG = GC_LOG
+  Object.metaClass.gp_log_array = gp_log_array
+  Object.metaClass.gp_log_header = gp_log_header
+  Object.metaClass.gp_log_exception = gp_log_exception
+''')
+
+JC_LOG = jy_ge ('GC_LOG')
+def jp_set_log_level_to_info () :  jy_gf ( 'gp_set_log_level_to_info' )
+def jp_set_log_level_to_warn () :  jy_gf ( 'gp_set_log_level_to_warn' )
+def jp_set_log_level_to_debug () : jy_gf ( 'gp_set_log_level_to_debug' )
+def jp_set_log_level_to_trace () : jy_gf ( 'gp_set_log_level_to_trace' )
+
+def jp_os_exit (x_ec) :
+  JC_LOG .info ( 'Elapsed {} ...' .format ( datetime.now () - GC_ST ) )
+  os._exit (x_ec)
+
+jy_ge ('''
+  gp_exit = { final long x_ec, final x_ex = [] ->
+    def pp2_before_exit = {
+      if (x_ex) gp_log_exception "Following error occurs !!!", x_ex
+      if ( x_ec != GC_EC_SUCCESS && !x_ex ) { gp_log_header ( GC_LOG.&error, "Unknown error occurs !!!" ); }
+      switch (x_ec) {
+        case GC_EC_NONE : GC_LOG .error "Undefined exit code (GC_EC_NONE), check your logic !!!"; break
+        case GC_EC_SHUTDOWN : GC_LOG .info "Exit from shutdown like ctrl+c, ..."; break
+        default :
+          if ( x_ec < 0 ) GC_LOG .error "Negative exit code ${x_ec}, should consider using a positive value !!!"
+          else GC_LOG .info "Exit code => ${x_ec}"
+          break
+      }
+    }
+    def pp2_exit = {
+      switch (x_ec) {
+        case GC_EC_NONE : gp_cy ( 'jp_os_exit', GC_EC_ERROR ); break
+        case GC_EC_SHUTDOWN : gp_cy ( 'jp_os_exit', GC_EC_ERROR ); break
+        default :
+          if ( x_ec < 0 ) gp_cy ( 'jp_os_exit', GC_EC_ERROR )
+          else  gp_cy ( 'jp_os_exit', x_ec .intValue () )
+          break
+      }
+    }
+    pp2_before_exit ()
+    pp2_exit ()
+  }
+''')
 
 CjActorRef = jf_jcls ('akka.actor.ActorRef')
 CjAwait    = jf_jcls ('scala.concurrent.Await')
@@ -456,63 +505,122 @@ CjSystem   = jf_jcls ('java.lang.System')
 JC_JAVA_VR = CjSystem .getProperty ('java.version')
 JC_GROOVY_VR = jf_jcls ('groovy.lang.GroovySystem') .getVersion ()
 
+class __DjExit : # (__)private mo(D)ule (g)lobal
+  __dav_cx = LgCx ( GC_EC_NONE, None )
+  __dav_was_lgcx_processed = False
+  @classmethod
+  def dp_it ( cls, x_cx ) :
+    JC_LOG .debug ( f'Received LgCx ({x_cx.lu_ec})' )
+    if cls.__dav_was_lgcx_processed == False :
+      cls.__dav_was_lgcx_processed = True
+      cls.__dav_cx = x_cx
+      cls.__dap_before_exit ()
+      cls.__dap_exit ()
+  @classmethod
+  def __dap_before_exit (cls) :
+    pu_ec = cls.__dav_cx.lu_ec
+    pu_ex = cls.__dav_cx.lu_ex
+    if pu_ex is not None : gp_log_exception ( JC_LOG .error, 'Following error occurs !!!', pu_ex, 60 )
+    if pu_ec != GC_EC_SUCCESS and pu_ex is None : gp_log_header ( JC_LOG .error, 'Unknown error occurs !!!', 60 )
+    if pu_ec == GC_EC_NONE : JC_LOG .error ( 'Undefined exit code (GC_EC_NONE), check your logic !!!' )
+    elif pu_ec == GC_EC_SHUTDOWN : JC_LOG .info ( 'Exit from shutdown like ctrl+c, ...' )
+    elif pu_ec < 0 : JC_LOG .error ( f'Negative exit code ({pu_ec}), should consider using a positive value !!!' )
+    else : JC_LOG .info ( 'Exit code => {}' .format (pu_ec) )
+  @classmethod
+  def __dap_exit (cls) :
+    pu_ec = cls.__dav_cx.lu_ec
+    if pu_ec == GC_EC_NONE : jp_os_exit (GC_EC_ERROR)
+    elif pu_ec == GC_EC_SHUTDOWN : jp_os_exit (GC_EC_ERROR)
+    elif pu_ec < 0 : jp_os_exit (GC_EC_ERROR)
+    else : jp_os_exit (pu_ec)
+
+def __jap_exit ( x_ec, x_ex = None ) :
+  pu_llos = gf_llos ()
+  if len(pu_llos) > 0 :
+    JC_LOG .warn ( f'You did not delete {len(pu_llos)} llo(s) with gp_dllo () function after using llo(s) !!!' )
+    gp_log_dict ( JC_LOG .warn, 'Undeleted python llo(s)', pu_llos )
+  pu_ex = ...
+  if x_ex is None : pu_ex = None
+  else : pu_ex = x_ex
+  __DjExit .dp_it ( LgCx ( x_ec, pu_ex ) )
+
 def jp_request_exit ( x_ec, x_ex_list = None ) :
+  jf_jcls ('javafx.application.Platform') .exit ()
   if JC_AS is not ... :
     JC_AS .terminate ()
     CjAwait .ready ( JC_AS .whenTerminated (), CjDuration .Inf () )
-  pu_ex_list = ...
-  if x_ex_list is None : pu_ex_list = None
-  else : pu_ex_list = x_ex_list if type(x_ex_list) is list else [x_ex_list]
-  pu_llos = gf_llos ()
-  if len(pu_llos) > 0 :
-    GC_LOG .warning ( f'You did not delete {len(pu_llos)} llo(s) with gp_dllo () function after using llo(s) !!!' )
-    gp_log_dict ( GC_LOG .warning, 'Undeleted python llo(s)', pu_llos )
-  __DgExit .dp_it ( LgCx ( x_ec, pu_ex_list ) )
+  pu_ex = ...
+  if x_ex_list is None : pu_ex = None
+  else :
+    pu_ex = "\n" .join ( map ( lambda bx3_it : str (bx3_it), x_ex_list ) )
+  if pu_ex == None : jy_ge ( f"gp_xr {{ gp_cy ( '__jap_exit', {x_ec} ) }}" )
+  else :
+    jy_gc ('''
+      { x_ec, final String x_ex -> 
+        gp_xr { gp_cy ( '__jap_exit', x_ec, x_ex ) }
+      }
+    ''', x_ec, pu_ex )
 
-jy_ge ( "addShutdownHook { gp_cy 'jp_request_exit', GC_EC_SHUTDOWN, 'Shutdown occurred !!!' }" )
+jy_ge ('''
+  addShutdownHook {
+    if ( gf_is_fat () ) {
+      gp_cy ( '__jap_exit', GC_EC_SHUTDOWN, 'Shutdown occurred !!!' )
+    } else {
+      gp_exit ( GC_EC_SHUTDOWN, [ 'Shutdown occurred !!!' ] )
+    }
+  }
+''')
 
 jy_ge ('''
   class CgAt extends akka.actor.AbstractActor { // (A)c(t)or
-    final private long __cau_at_yi
-    CgAt ( final long x_yi_at ) { this.__cau_at_yi = x_yi_at }
+    final private long __cau_yi_at
+    CgAt ( final long x_yi_at ) { this.__cau_yi_at = x_yi_at }
     void preStart () {
-      gp_xr { gp_yn ( this.__cau_at_yi, 'cn_pre_start', this ) }
+      gp_xr { gp_yn ( this.__cau_yi_at, 'cn_pre_start', this ) }
     }
     akka.actor.AbstractActor.Receive createReceive () {
       return receiveBuilder () .match ( Object.class, { x_letter ->
-        gp_xr { gp_yn ( this.__cau_at_yi, 'receive', x_letter, getSender () ) }
+        gp_xr { gp_yn ( this.__cau_yi_at, 'cn_receive', x_letter, getSender () ) }
       } ) .build ()
     }
     void postStop () {
-      gp_xr { gp_yn ( this.__cau_at_yi, 'cn_post_stop' ) }
+      gp_xr { gp_yn ( this.__cau_yi_at, 'cn_post_stop' ) }
     }
   }
-  def gf_mk_atr ( final long x_yi_at, final String x_at_nm, final akka.actor.ActorRefFactory x_arf ) { // atr -> (a)c(t)or (r)eference
+  gf_mk_atr = { final long x_yi_at, final String x_at_nm, final akka.actor.ActorRefFactory x_arf -> // atr -> (a)c(t)or (r)eference
     switch (x_at_nm) {
       case ':a' : return x_arf .actorOf ( akka.actor.Props .create ( CgAt, x_yi_at ) )
       default : return x_arf .actorOf ( akka.actor.Props .create ( CgAt, x_yi_at ), x_at_nm )
     }
   }
 ''')
-class CjAt (CgQo) :
+class CjAt (QObject) :
   def __init__ (self) :
     super () .__init__ ()
     self.cu_yi = gf_cllo (self)
-  def cn_pre_start ( self, x_org_at ) :
-    self.cu_org_at = x_org_at
-    if hasattr ( self, 'preStart' ) : getattr ( self, 'preStart' ) ()
+  def cn_pre_start ( self, x_at_org ) :
+    try :
+      self.cu_at_org = x_at_org
+      if hasattr ( self, 'preStart' ) : getattr ( self, 'preStart' ) ()
+    except : jp_request_exit ( GC_EC_ERROR, gf_exception_to_list () )
+  def cn_receive ( self, x_letter, x_atr_sender ) :
+    try :
+      if hasattr ( self, 'receive' ) : getattr ( self, 'receive' ) ( x_letter, x_atr_sender )
+    except : jp_request_exit ( GC_EC_ERROR, gf_exception_to_list () )
   def cn_post_stop (self) :
-    if hasattr ( self, 'postStop' ) : getattr ( self, 'postStop' ) ()
-    gf_yo ( self.cu_yi, True )
-  def getSelf (self) : return self.cu_org_at .getSelf ()
-  def getContext (self) : return self.cu_org_at .getContext ()
+    try :
+      if hasattr ( self, 'postStop' ) : getattr ( self, 'postStop' ) ()
+      gf_yo ( self.cu_yi, True )
+    except : jp_request_exit ( GC_EC_ERROR, gf_exception_to_list () )
+  def getSelf (self) : return self.cu_at_org .getSelf ()
+  def getContext (self) : return self.cu_at_org .getContext ()
   def tell ( self, x_atr_target, x_letter, x_atr_sender = None ) :
     nu_atr_sender = self .getSelf () if x_atr_sender == None else x_atr_sender
     x_atr_target .tell ( x_letter, nu_atr_sender )
 JC_AS = ...
 def jf_mk_atr ( x_at, x_at_nm, x_arf = None ) :
   global JC_AS
-  if JC_AS is ... : JC_AS = jy_ge ( '''{0} = akka.actor.ActorSystem .create '{0}', com.typesafe.config.ConfigFactory .parseString ( 'akka {{ loglevel = "ERROR" }}' )''' .format ('GC_AS') )
+  if JC_AS is ... : JC_AS = jy_ge ( '''Object.metaClass.{0} = akka.actor.ActorSystem .create '{0}', com.typesafe.config.ConfigFactory .parseString ( 'akka {{ loglevel = "ERROR" }}' )''' .format ('GC_AS') )
   fu_arf = JC_AS if x_arf is None else x_arf
   fu_at_nm = x_at.__class__.__name__ if x_at_nm == ':c' else ':a' if x_at_nm == None else x_at_nm
   return jy_gf ( 'gf_mk_atr', gf_yi (x_at), fu_at_nm, fu_arf )
@@ -524,33 +632,33 @@ class DRun :
   @classmethod
   def __dap_begin (cls) :
     print ( "\n" .join ( gf_banner () ) )
-    GC_LOG .debug ( f'Pyja name => {GC_PYJA_NM}' )
+    JC_LOG .debug ( f'Pyja name => {GC_PYJA_NM}' )
     if GC_PYJA_NM != gf_os_env ('SC_PYJA_NM') : raise Exception ( 'Invalid Pyja name !!!' )
-    GC_LOG .debug ( f'Pyja creation date => {GC_PYJA_CD}' )
+    JC_LOG .debug ( f'Pyja creation date => {GC_PYJA_CD}' )
     if not gf_str_is_valid_date ( GC_PYJA_CD, '%Y.%m.%d' ) : raise Exception ( 'Pyja create date is not invalid !!!' )
-    GC_LOG .debug ( f'Pyja version => {GC_PYJA_V2}' )
+    JC_LOG .debug ( f'Pyja version => {GC_PYJA_V2}' )
     if GC_PYJA_VR != gf_os_env ('SC_PYJA_VR') : raise Exception ( 'Invalid Pyja version !!!' )
-    GC_LOG .info  ( f'Pyja root ({GC_PYJA_RT_SYM}) => {GC_PYJA_RT}' )
-    GC_LOG .info  ( f'Pyja home ({GC_PYJA_HM_SYM}) => { gf_to_prs (GC_PYJA_HM) }' )
-    GC_LOG .info  ( f'Milo path ({GC_MILO_PN_SYM}) => { gf_to_phs (GC_MILO_PN) }' )
-    GC_LOG .info  ( f'Java version => {JC_JAVA_VR}' )
-    GC_LOG .info  ( f'Python version => {GC_PYTHON_VR}' )
-    GC_LOG .info  ( f'Tcl version => {GC_TCL_VR}' )
-    GC_LOG .info  ( f'PyQt version => {GC_PYQT_VR}' )
-    GC_LOG .info  ( f'Groovy version => {JC_GROOVY_VR}' )
-    GC_LOG .debug ( f'Python home => {GC_PYTHON_HM}' )
-    GC_LOG .debug ( f'Total CPU => {GC_TOTAL_CPU}' )
-    GC_LOG .debug ( f'Total memory => {GC_TOTAL_MEMORY:,d} bytes' )
-    GC_LOG .debug ( f'Available memory => {gf_os_available_memory():,d} bytes' )
-    GC_LOG .debug ( f'Computer name => {GC_HOST_NM}' )
-    GC_LOG .debug ( f'Current user => {GC_CUSR}' )
-    GC_LOG .debug ( f'Process ID => {GC_THIS_PID}' )
-    GC_LOG .debug ( f'Executable file => {GC_THIS_EXE_FN}' )
-    GC_LOG .info  ( f'Start up path => { gf_to_phs (GC_THIS_START_UP_PN) }' )
-    GC_LOG .info  ( f'Script file => { gf_to_mps (GC_SCRIPT_FN) }' )
-    gp_log_array ( GC_LOG .debug, 'Paths', GC_OS_ENV_PATHS )
-    if len(GC_CMD) > 0 : gp_log_array ( GC_LOG .debug, 'Command', GC_CMD )
-    if len(GC_ARGV) > 0 : gp_log_array ( GC_LOG .info, 'Arguments', GC_ARGV )
+    JC_LOG .info  ( f'Pyja root ({GC_PYJA_RT_SYM}) => {GC_PYJA_RT}' )
+    JC_LOG .info  ( f'Pyja home ({GC_PYJA_HM_SYM}) => { gf_to_prs (GC_PYJA_HM) }' )
+    JC_LOG .info  ( f'Milo path ({GC_MILO_PN_SYM}) => { gf_to_phs (GC_MILO_PN) }' )
+    JC_LOG .info  ( f'Java version => {JC_JAVA_VR}' )
+    JC_LOG .info  ( f'Python version => {GC_PYTHON_VR}' )
+    JC_LOG .info  ( f'Tcl version => {GC_TCL_VR}' )
+    JC_LOG .info  ( f'PyQt version => {GC_PYQT_VR}' )
+    JC_LOG .info  ( f'Groovy version => {JC_GROOVY_VR}' )
+    JC_LOG .debug ( f'Python home => {GC_PYTHON_HM}' )
+    JC_LOG .debug ( f'Total CPU => {GC_TOTAL_CPU}' )
+    JC_LOG .debug ( f'Total memory => {GC_TOTAL_MEMORY:,d} bytes' )
+    JC_LOG .debug ( f'Available memory => {gf_os_available_memory():,d} bytes' )
+    JC_LOG .debug ( f'Computer name => {GC_HOST_NM}' )
+    JC_LOG .debug ( f'Current user => {GC_CUSR}' )
+    JC_LOG .debug ( f'Process ID => {GC_THIS_PID}' )
+    JC_LOG .debug ( f'Executable file => {GC_THIS_EXE_FN}' )
+    JC_LOG .info  ( f'Start up path => { gf_to_phs (GC_THIS_START_UP_PN) }' )
+    JC_LOG .info  ( f'Script file => { gf_to_mps (GC_SCRIPT_FN) }' )
+    gp_log_array ( JC_LOG .debug, 'Paths', GC_OS_ENV_PATHS )
+    if len(GC_CMD) > 0 : gp_log_array ( JC_LOG .debug, 'Command', GC_CMD )
+    if len(GC_ARGV) > 0 : gp_log_array ( JC_LOG .info, 'Arguments', GC_ARGV )
   @classmethod
   def dp_it (cls) :
     try :
@@ -578,8 +686,7 @@ class WQtMain ( CgQo, TgWai ) :
     super () .__init__ ()
     self .wn_init ()
   def wn_init (self) :
-    GC_LOG .info ( self.tm_wai ('Initializing ...') )
-    self.wu_yi = gf_yi (self)
+    JC_LOG .info ( self.tm_wai ('Initializing ...') )
     self.wu_mw = QMainWindow ()
     self.wu_mw .setWindowTitle (GC_APP_NM)
     self.wu_mw.showEvent = lambda _ : self.wn_shown ()
@@ -607,7 +714,7 @@ class WQtMain ( CgQo, TgWai ) :
   def wn_change_font (self) :
     if self.wv_fnt_idx >= len(self.wu_fnt_families) : self.wv_fnt_idx = 0
     nu_fnt_nm = self.wu_fnt_families [self.wv_fnt_idx]
-    if self.wv_msg != '' : GC_LOG .info ( f'[Qt] {self.wv_msg}' )
+    if self.wv_msg != '' : JC_LOG .info ( f'[Qt] {self.wv_msg}' )
     nu_nt = f'({self.wv_fnt_idx+1}/{len(self.wu_fnt_families)})'
     self.wv_msg = f'0^0 {nu_nt} ({nu_fnt_nm})'
     self.wu_pb .setText ( f"Say '{self.wv_msg}'" )
@@ -618,21 +725,21 @@ class WQtMain ( CgQo, TgWai ) :
   def wn_move_center (self) :
     nu_cp = QDesktopWidget () .availableGeometry () .center () # center point
     self.wu_mw .move ( nu_cp .x () - self.wu_mw .width () / 2, nu_cp .y () - self.wu_mw .height () / 2 )
-  def wn_shown (self) : GC_LOG .info ( 'Widget shown ...' )
+  def wn_shown (self) : JC_LOG .info ( 'Widget shown ...' )
   def wn_quit (self) :
-    GC_LOG .info ( self.tm_wai ( 'About to quit ...' ) )
+    JC_LOG .info ( self.tm_wai ( 'About to quit ...' ) )
     jp_request_exit (GC_EC_SUCCESS)
 
 class DBody :
   @classmethod
   def dp_it (cls) :
     GC_QAPP .setStyle ('fusion')
-    cls.du_qt = WQtMain ()
+    pu_qt = WQtMain ()
 
 class OStart :
   @classmethod
   def main (cls) :
-    gp_set_log_level_to_info ()
+    jp_set_log_level_to_info ()
     DRun .dp_it ()
   
 if __name__ == '__main__':
