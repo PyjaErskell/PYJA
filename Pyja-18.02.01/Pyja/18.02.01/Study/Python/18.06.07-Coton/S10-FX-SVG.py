@@ -714,7 +714,7 @@ class WFxMain ( CgQo, TgWai ) :
     nu_bf .open (QIODevice.WriteOnly)
     QPixmap (nu_svg_fn) .save ( nu_bf, 'PNG' )
 
-    self.wu_lb_svg_img = CjFxImageView ( CjFxImage (jf_ba_2_jbais (nu_ba)) )
+    self.wu_lb_svg_img = CjFxImageView ( CjFxImage ( jf_ba_2_jbais (nu_ba) ) )
     self.wu_wv_license = CjFxWebView ()
     self.wu_wv_license .getEngine () .loadContent ('''
       <center>
