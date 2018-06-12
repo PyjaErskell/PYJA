@@ -714,7 +714,7 @@ class WFxMain ( CgQo, TgWai ) :
     nu_bf .open (QIODevice.WriteOnly)
     QPixmap (nu_svg_fn) .save ( nu_bf, 'PNG' )
 
-    self.wu_lb_svg_img = CjFxImageView ( CjFxImage ( jf_ba_2_jbais (nu_ba) ) )
+    self.wu_iv_svg = CjFxImageView ( CjFxImage ( jf_ba_2_jbais (nu_ba) ) )
     self.wu_wv_license = CjFxWebView ()
     self.wu_wv_license .getEngine () .loadContent ('''
       <center>
@@ -725,7 +725,7 @@ class WFxMain ( CgQo, TgWai ) :
     ''')
     self.wu_root .setAlignment (CjFxPos.CENTER)
     self.wu_root .setSpacing (10)
-    self.wu_root .getChildren () .addAll ( [ self.wu_lb_svg_img, self.wu_wv_license ] )
+    self.wu_root .getChildren () .addAll ( [ self.wu_iv_svg, self.wu_wv_license ] )
     jy_gc ('''{ x_yi, x_stage ->
       x_stage .with {
         onShown = { gp_yn x_yi, 'wn_shown' }
