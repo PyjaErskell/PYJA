@@ -706,7 +706,7 @@ class WFxMain ( CgQo, TgWai ) :
     self.wu_scene = CjFxScene ( self.wu_root, 650, 650 )
     self.wu_stage .setTitle (GC_APP_NM)
     self.wu_stage .setScene (self.wu_scene)
-    nu_svg_fn = gf_pj ( GC_MILO_PN, 'ass', 'fx-180611-1413.svg' )
+    nu_svg_fn = gf_pj ( GC_MILO_PN, 'as', 'fx-180611-1413.svg' )
     JC_LOG .info ( f'SVG file => { gf_to_mps (nu_svg_fn) }' )
 
     nu_ba = QByteArray ()

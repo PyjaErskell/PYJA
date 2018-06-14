@@ -694,7 +694,7 @@ class WQtMain ( CgQo, TgWai ) :
     self.wu_lo = QVBoxLayout ()
     self.wu_lb_svg_img = QLabel ()
     self.wu_lb_svg_img .setAlignment (Qt.AlignCenter)
-    nu_svg_fn = gf_pj ( GC_MILO_PN, 'ass', 'qt-180611-1413.svg' )
+    nu_svg_fn = gf_pj ( GC_MILO_PN, 'as', 'qt-180611-1413.svg' )
     JC_LOG .info ( f'SVG file => { gf_to_mps (nu_svg_fn) }' )
     self.wu_lb_svg_img .setPixmap ( QPixmap (nu_svg_fn) )
     self.wu_lb_license = QLabel ('''

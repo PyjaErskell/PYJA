@@ -718,7 +718,7 @@ class WFxMain ( CgQo, TgWai ) :
     self.wu_stage .setTitle (GC_APP_NM)
     self.wu_stage .setScene (self.wu_scene)
 
-    nu_qt_svg_fn = gf_pj ( GC_MILO_PN, 'ass', 'qt-180611-1413.svg' )
+    nu_qt_svg_fn = gf_pj ( GC_MILO_PN, 'as', 'qt-180611-1413.svg' )
     JC_LOG .info ( f'Qt SVG file => { gf_to_mps (nu_qt_svg_fn) }' )
     self.wu_iv_qt_svg = jy_gc ('''{ x_yi, x_fn ->
       final fu_img = new javafx.scene.image.Image ( gf_ym ( x_yi, 'wm_pixmap', x_fn ) )
@@ -731,7 +731,7 @@ class WFxMain ( CgQo, TgWai ) :
       return fu_iv
     }''', self.cu_yi, nu_qt_svg_fn )
 
-    nu_fx_svg_fn = gf_pj ( GC_MILO_PN, 'ass', 'fx-180611-1413.svg' )
+    nu_fx_svg_fn = gf_pj ( GC_MILO_PN, 'as', 'fx-180611-1413.svg' )
     JC_LOG .info ( f'FX SVG file => { gf_to_mps (nu_fx_svg_fn) }' )
     self.wu_iv_fx_svg = jy_gc ('''{ x_fn ->
       final fu_img = new javafx.scene.image.Image ( gf_cy ( 'jf_pixmap', x_fn ) )
