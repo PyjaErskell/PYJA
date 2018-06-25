@@ -11,6 +11,8 @@ import getpass
 import platform
 import psutil
 
+from datetime import datetime
+
 from PyQt5 import QtCore
 from PyQt5.QtCore import pyqtSignal
 from PyQt5.QtCore import QBuffer
@@ -99,6 +101,13 @@ def jf_jcls (x_cls_nm) : return jep.findClass (x_cls_nm)
 
 CjByteArrayInputStream  = jf_jcls ('java.io.ByteArrayInputStream')
 CjByteArrayOutputStream = jf_jcls ('java.io.ByteArrayOutputStream')
+CjCalendar = jf_jcls ('java.util.Calendar')
+
+def jf_elapsed (x_st) : # get elpased from given start time of java.util.Date
+  fu_cd = CjCalendar .getInstance ()
+  fu_cd .setTime (x_st)
+  fu_st = datetime ( fu_cd .get (CjCalendar.YEAR), fu_cd .get (CjCalendar.MONTH) + 1, fu_cd .get (CjCalendar.DAY_OF_MONTH), fu_cd .get (CjCalendar.HOUR_OF_DAY), fu_cd .get (CjCalendar.MINUTE), fu_cd .get (CjCalendar.SECOND) )
+  return datetime .now () - fu_st
 
 def jf_pixmap ( x_fn, x_format = 'PNG' ) : # Load image from file for using QPixmap in java
   fu_qba = QByteArray ()

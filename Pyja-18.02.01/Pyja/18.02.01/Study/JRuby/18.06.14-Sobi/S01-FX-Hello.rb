@@ -2,7 +2,7 @@
 # JRuby (Global
 #
 
-GC_ST = Time.now
+GC_ST = Time .at $__gau_st.time / 1000
 
 GC_FX_STAGE = $__gau_fx_stage
 
@@ -95,7 +95,7 @@ def gf_banner x_leading_space = 0, x_margin_inside = 2
     "#{GC_PYJA_NM} #{GC_APP_NM}",
     "made by #{GC_PYJA_AU}",
     '',
-    "ran on #{ Time .now .strftime ('%F %T') }",
+    "ran on #{ GC_ST .strftime ('%F %T') }",
     'released under the GNU AGPL v3, see <http://www.gnu.org/licenses/>.',
   ]
   fu_msl = fu_msgs .map { |bx2_it| bx2_it.size } .max # max string length
@@ -342,7 +342,7 @@ private
     when pu_ec < 0 then GC_LOG .error "Negative exit code (#{pu_ec}), should consider using a positive value !!!"
     else GC_LOG .info "Exit code => #{pu_ec}"
     end
-    GC_LOG.info "Elpased #{ ( Time.at Time.now - GC_ST ) .utc .strftime ('%H:%M:%S.%L') } ..."
+    GC_LOG.info "Elpased #{ gy_cy 'jf_elapsed', GC_ST } ..."
     GC_AS .terminate
     CgAwait .ready GC_AS .when_terminated, CgDuration.Inf
   end
@@ -357,7 +357,7 @@ private
   end
 }
 def gp_request_exit x_ec, x_ex = nil
-  $__DgExit .dp_it LgCx.new x_ec, x_ex
+  gp_xr { $__DgExit .dp_it LgCx.new x_ec, x_ex }
 end
 def gp_register_on_termination
   GC_AS .register_on_termination gf_jr { yield if block_given? }
@@ -469,6 +469,7 @@ module DBody
       # Code to run after termination of GC_AS, in this block you can't use GC_LOG
     }
     gf_mk_atr WAtMain, [], :c
+    # gp_request_exit GC_EC_SUCCESS
   end
 end
 
