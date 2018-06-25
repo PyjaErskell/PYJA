@@ -357,7 +357,7 @@ private
   end
 }
 def gp_request_exit x_ec, x_ex = nil
-  gp_xr { $__DgExit .dp_it LgCx.new x_ec, x_ex }
+  $__DgExit .dp_it LgCx.new x_ec, x_ex
 end
 def gp_register_on_termination
   GC_AS .register_on_termination gf_jr { yield if block_given? }
@@ -469,7 +469,6 @@ module DBody
       # Code to run after termination of GC_AS, in this block you can't use GC_LOG
     }
     gf_mk_atr WAtMain, [], :c
-    # gp_request_exit GC_EC_SUCCESS
   end
 end
 
