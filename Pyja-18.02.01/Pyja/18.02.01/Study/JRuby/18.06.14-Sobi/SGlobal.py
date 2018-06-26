@@ -91,6 +91,8 @@ def gf_app_name () : return GC_APP_NM
 def gf_script_file_name () : return GC_SCRIPT_FN
 def gf_argv () : return GC_ARGV
 
+def gf_desktop_pn () : return QStandardPaths .writableLocation (QStandardPaths.DesktopLocation)
+
 #
 # Java (Global)
 #
