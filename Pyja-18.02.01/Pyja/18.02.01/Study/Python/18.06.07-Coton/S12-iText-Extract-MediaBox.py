@@ -827,7 +827,6 @@ class WMain ( QMainWindow, TgWai ) :
     nv_row = 0
     nv_row = nf2_ui_add_input   (nv_row) + 1
     nv_row = nf2_ui_add_hor_ln  (nv_row) + 1
-    nv_row = nf2_ui_add_hor_ln  (nv_row) + 1
     nv_row = nf2_ui_add_output  (nv_row) + 1
     nv_row = nf2_ui_add_hor_ln  (nv_row) + 1
     nv_row = nf2_ui_add_process (nv_row) + 1
