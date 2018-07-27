@@ -466,7 +466,6 @@ class WAtMain < CgAt
       it.show_tick_marks = true
       it.block_increment = 10
       it.value_property .add_listener { | bx2_obs, bx2_old, bx2_new |
-        it.value = bx2_new .to_i
         wn_display_no it.value .to_i
         wn_display_fibo
       }
