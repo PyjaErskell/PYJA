@@ -524,6 +524,7 @@ jy_ge ('''
 
 CjActorRef              = jf_jcls ('akka.actor.ActorRef')
 CjAwait                 = jf_jcls ('scala.concurrent.Await')
+CjBigInteger            = jf_jcls ('java.math.BigInteger')
 CjByteArrayInputStream  = jf_jcls ('java.io.ByteArrayInputStream')
 CjByteArrayOutputStream = jf_jcls ('java.io.ByteArrayOutputStream')
 CjDuration              = jf_jcls ('scala.concurrent.duration.Duration')
@@ -678,14 +679,18 @@ def jf_mk_atr ( x_at, x_at_nm, x_arf = None ) :
   return jy_gf ( 'gf_mk_atr', gf_yi (x_at), fu_at_nm, fu_arf )
 
 class TjUtil :
-  def tn_set_fx_eh ( self, x_xo, x_xo_eh_nm, x_yo_nethod_nm ) : # xo -> F(x) (o)bject, eh -> fx (e)vent (h)andler
+  def tn_fx_set_eh ( self, x_xo, x_xo_eh_nm, x_yo_nethod_nm ) : # xo -> F(x) (o)bject, eh -> fx (e)vent (h)andler
     jy_gc ( f"""{{ x_xo ->
       x_xo.{x_xo_eh_nm} = {{ x2_ev -> gp_yn {self.cu_yi}, '{x_yo_nethod_nm}', x2_ev }}
     }}""", x_xo  )
-  def tn_add_fx_cl ( self, x_property, x_yo_nethod_nm ) : # cl -> (c)hange (l)istener
+  def tn_fx_add_cl ( self, x_property, x_yo_nethod_nm ) : # cl -> (c)hange (l)istener
     jy_gc ( f"""{{ x_property ->
       x_property .addListener ( {{ x2_obs, x2_old, x2_new -> gp_yn {self.cu_yi}, '{x_yo_nethod_nm}', x2_obs, x2_old, x2_new }} as javafx.beans.value.ChangeListener )
     }}""", x_property  )
+  def tn_ak_fut_oc ( self, x_future, x_yo_nethod_nm ) : # ak -> (ak)ka, fut -> (fut)ure, oc -> (o)n(C)omplete
+    jy_gc ( f"""{{ x_future, x_dispatcher ->
+      x_future .onComplete ( {{ x2_throwable, x2_result -> gp_xr {{ gp_yn {self.cu_yi}, '{x_yo_nethod_nm}', x2_throwable, x2_result }} }} as akka.dispatch.OnComplete, x_dispatcher )
+    }}""", x_future, self .getContext () .dispatcher ()  )
 
 #
 # Main Skeleton
@@ -739,15 +744,15 @@ class CAtFibonacci ( CjAt, TgWai ) :
   def create (self) : self .wn_init ()
   def wn_init (self) :
     JC_LOG .info ( self.tm_wai ('Initializing ...') )
+    self.wu_cache = { 0 : 0, 1 : 1 }
+  def wm_fibo ( self, x_no ) :
+    if x_no in self.wu_cache : return self.wu_cache [x_no]
+    mu_it = self .wm_fibo ( x_no - 2 ) + self .wm_fibo ( x_no - 1 )
+    self.wu_cache [x_no] = mu_it
+    return mu_it 
   def receive ( self, x_letter, x_atr_sender ) :
-    # nu_java_nm = x_letter.java_name
-    # JC_LOG .debug ( self.tm_wai ( f'Received {nu_java_nm}' ) )
     JC_LOG .debug ( self.tm_wai ( f'Received {x_letter}' ) )
-    print ( type (x_letter) )
-    print ( x_atr_sender )
-    print ( self .getSelf () )
-    self .tell ( x_atr_sender, x_letter * 10000 )
-    # if ( nu_java_nm == 'LNextFont' ) : self. wn_change_font (False)
+    self .tell ( x_atr_sender, CjBigInteger ( str ( self .wm_fibo (x_letter) ) ) )
 
 Insets = jf_jcls ('javafx.geometry.Insets')
 Label  = jf_jcls ('javafx.scene.control.Label')
@@ -765,7 +770,7 @@ class WAtMain ( CjAt, TjUtil, TgWai ) :
     self.wu_timeout = CjTimeout ( CjDuration .create ( 2, 'seconds' ) )
     self.wu_lb_no = Label ()
     nu_initial_no = 21
-    self .wn_display_no (nu_initial_no)
+    self .wn_show_no (nu_initial_no)
     def nf2_sldr_4_no (it) :
       it .setMin (0)
       it .setMax (360)
@@ -773,7 +778,7 @@ class WAtMain ( CjAt, TjUtil, TgWai ) :
       it .setShowTickLabels (True)
       it .setShowTickMarks (True)
       it .setBlockIncrement (10)
-      self .tn_add_fx_cl ( it .valueProperty (), 'wn_cl_sldr_4_no_val' )
+      self .tn_fx_add_cl ( it .valueProperty (), 'wn_cl_sldr_4_no_val' )
       return it
     self.wu_sldr_4_no = nf2_sldr_4_no ( Slider () )
     self.wu_lb_fibo = Label ( 'Fibonacci :' )
@@ -790,27 +795,27 @@ class WAtMain ( CjAt, TjUtil, TgWai ) :
       it .setWidth (750)
       it .setHeight (190)
       it .setScene ( Scene (self.wu_root) )
-      self .tn_set_fx_eh ( it, 'onShown', 'wn_on_shown' )
-      self .tn_set_fx_eh ( it, 'onCloseRequest', 'wn_on_quit' )
+      self .tn_fx_set_eh ( it, 'onShown', 'wn_on_shown' )
+      self .tn_fx_set_eh ( it, 'onCloseRequest', 'wn_on_quit' )
       it .centerOnScreen ()
       it .show ()
       it .toFront ()
       return it
     self.wu_stage = nf2_stage (JC_FX_STAGE)
-  def wn_display_no ( self, x_no ) : self.wu_lb_no .setText ( f'Number => {x_no}' )
-  def wn_display_fibo (self) :
-    # self .tell ( self.wu_atr_fibo, int ( self.wu_sldr_4_no .getValue () ) )
-    # self .tell ( self.wu_atr_fibo, CjString ('Hello World') )
+  def wn_show_no ( self, x_no ) : self.wu_lb_no .setText ( f'Number => {x_no}' )
+  def wn_ask_fibo (self) :
     nu_future = CjPatterns .ask ( self.wu_atr_fibo, int ( self.wu_sldr_4_no .getValue () ), self.wu_timeout )
-    print (nu_future.onSuccess)
-    # nu_result = CjAwait .result ( nu_future, self.wu_timeout .duration () )
-    # print (nu_result)
+    self .tn_ak_fut_oc ( nu_future, 'wn_oc_fibo' )
+  def wn_oc_fibo ( self, x_throwable, x_result ) :
+    if x_throwable is None :
+      bu2_fibo = int ( x_result .toString () )
+      self.wu_lb_fibo_result .setText ( f'{bu2_fibo:,d}' )
   def wn_cl_sldr_4_no_val ( self, x_obs, x_old, x_new ) :
-    self .wn_display_no ( int ( self.wu_sldr_4_no .getValue () ) )
-    self .wn_display_fibo ()
+    self .wn_show_no ( int ( self.wu_sldr_4_no .getValue () ) )
+    self .wn_ask_fibo ()
   def wn_on_shown ( self, x_ev ) :
     JC_LOG .info ( self.tm_wai ( 'Stage shown ...' ) )
-    self .wn_display_fibo ()
+    self .wn_ask_fibo ()
   def wn_on_quit ( self, x_ev ) :
     JC_LOG .info ( self.tm_wai ( 'About to quit ...' ) )
     jp_request_exit (GC_EC_SUCCESS)
