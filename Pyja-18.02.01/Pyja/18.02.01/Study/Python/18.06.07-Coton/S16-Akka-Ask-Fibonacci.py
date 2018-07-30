@@ -741,18 +741,18 @@ class DRun :
 
 class CAtFibonacci ( CjAt, TgWai ) :
   def __init__ (self) : super () .__init__ ()
-  def create (self) : self .wn_init ()
-  def wn_init (self) :
+  def create (self) : self .cn_init ()
+  def cn_init (self) :
     JC_LOG .info ( self.tm_wai ('Initializing ...') )
     self.wu_cache = { 0 : 0, 1 : 1 }
-  def wm_fibo ( self, x_no ) :
+  def cm_fibo ( self, x_no ) :
     if x_no in self.wu_cache : return self.wu_cache [x_no]
-    mu_it = self .wm_fibo ( x_no - 2 ) + self .wm_fibo ( x_no - 1 )
+    mu_it = self .cm_fibo ( x_no - 2 ) + self .cm_fibo ( x_no - 1 )
     self.wu_cache [x_no] = mu_it
     return mu_it 
   def receive ( self, x_letter, x_atr_sender ) :
     JC_LOG .debug ( self.tm_wai ( f'Received {x_letter}' ) )
-    self .tell ( x_atr_sender, CjBigInteger ( str ( self .wm_fibo (x_letter) ) ) )
+    self .tell ( x_atr_sender, CjBigInteger ( str ( self .cm_fibo (x_letter) ) ) )
 
 Insets = jf_jcls ('javafx.geometry.Insets')
 Label  = jf_jcls ('javafx.scene.control.Label')
