@@ -37,12 +37,16 @@ GC_EC_ERROR    = 1
 
 from PyQt5 import QtCore
 from PyQt5.QtCore import pyqtSignal
+from PyQt5.QtCore import QBuffer
+from PyQt5.QtCore import QByteArray
 from PyQt5.QtCore import QCoreApplication
+from PyQt5.QtCore import QIODevice
 from PyQt5.QtCore import QObject
 from PyQt5.QtCore import QStandardPaths
 from PyQt5.QtCore import Qt
 from PyQt5.QtCore import QThread
 from PyQt5.QtCore import QTimer
+from PyQt5.QtGui import QPixmap
 from PyQt5.QtWidgets import QApplication
 from PyQt5.QtWidgets import QDesktopWidget
 
@@ -76,6 +80,11 @@ GC_HOST_NM = platform.node()
 GC_CUSR = getpass.getuser ()
 GC_THIS_PID = os.getpid ()
 
+def gf_frange ( x_start, x_end, x_step = 1.0, x_include_end = False ) :
+  fv_it = x_start
+  while ( fv_it < x_end if not x_include_end else fv_it <= x_end ) :
+    yield fv_it
+    fv_it += x_step
 def gf_os_env (x_key) : return os.environ [x_key] # (g)lobal (f)unction
 def gf_str_is_valid_date ( x_str, x_format ) :
   try : time .strptime ( x_str, x_format )
@@ -293,7 +302,7 @@ class __DgLongLiveObjects :
   __dau_it = {}
   @classmethod
   def df_cllo ( cls, x_it, *x_args ) : # cllo -> (c)reate (l)ong (l)ive (o)bject
-    fu_yo = ...
+    fu_yo = ... # yo -> p(y)thon (o)bject
     if inspect.isclass (x_it) :
       fu_yo = x_it (*x_args)
     elif isinstance ( x_it, object ) :
@@ -322,6 +331,9 @@ def gf_yi (x_yo) : # p(y)thon (i)d
 def gp_yn ( x_yi, x_nethod_nm, *x_args ) : # from p(y)thon id, call (n)ethod
   pu_yo = gf_yo (x_yi)
   if hasattr ( pu_yo, x_nethod_nm ) : getattr ( pu_yo, x_nethod_nm ) (*x_args)
+def gf_ym ( x_yi, x_method_nm, *x_args ) : # from p(y)thon id, call (m)ethod
+  pu_yo = gf_yo (x_yi)
+  if hasattr ( pu_yo, x_method_nm ) : return getattr ( pu_yo, x_method_nm ) (*x_args)
 
 def gf_wai ( x_msg = None ) :
   fu_frame = sys._getframe().f_back
@@ -359,6 +371,12 @@ class CgQo (QObject) :
 
 import jep
 
+def jf_ja ( x_type, *x_jo_list ) : # (j)ava (a)rray with type
+  fu_sz = len (x_jo_list)
+  fu_ja = jep .jarray ( fu_sz, x_type )
+  for bu2_idx, bu2_it in enumerate (x_jo_list) : fu_ja [bu2_idx] = x_jo_list [bu2_idx]
+  return fu_ja
+
 JC_GR = jep .findClass ('javax.script.ScriptEngineManager') () .getEngineByName ('groovy')
 JC_GR .put ( 'GC_JEP', JC_JEP )
 
@@ -373,6 +391,7 @@ jy_ge (f'''
 ''')
 jy_ge ('''
   gf_jcls = { final String x_cls_nm -> return Class.forName (x_cls_nm) }
+  gf_is_instance = { final x_cls, final x_oj -> x_cls .isInstance (x_oj) }
   gp_add_jar = { final String x_jar_fn ->
     if ( ! new File (x_jar_fn) .exists () ) { throw new FileNotFoundException ( "JAR file not found => ${x_jar_fn}" ) }
     final URL pu_url = new File (x_jar_fn) .toURI () .toURL ()
@@ -387,24 +406,30 @@ jy_ge ('''
   gp_xr = { final Closure xp_it -> // JavaF(x) (r)un
     javafx.application.Platform .runLater { xp_it () }
   }
-  gp_cy = { final String x_fun_nm, final Object... x_args -> GC_JEP .invoke ( x_fun_nm, *x_args ) } // (c)all p(y)thon
+  gp_cy = { final String x_fun_nm, final Object... x_args -> GC_JEP .invoke ( x_fun_nm, *x_args ) } // (c)all p(y)thon without return
+  gf_cy = { final String x_fun_nm, final Object... x_args -> return GC_JEP .invoke ( x_fun_nm, *x_args ) } // (c)all p(y)thon with return
   gp_yn = { final long x_yi, final String x_nethod_nm, final Object... x_args -> gp_cy ( 'gp_yn', x_yi, x_nethod_nm, *x_args ) }
+  gf_ym = { final long x_yi, final String x_method_nm, final Object... x_args -> return gf_cy ( 'gf_ym', x_yi, x_method_nm, *x_args ) }
   gf_is_fat = { return javafx.application.Platform .isFxApplicationThread () }
   Object.metaClass.gp_xr = gp_xr
+  Object.metaClass.gp_cy = gp_cy
+  Object.metaClass.gf_cy = gf_cy
   Object.metaClass.gp_yn = gp_yn
+  Object.metaClass.gf_ym = gf_ym
 ''')
-def jf_jarray (x_py_list) :
+def jf_gp (x_py_list) : # to (g)roovy (p)arameters
   fu_arr_sz = len (x_py_list)
   fu_params = jy_ge ( f'new Object [{fu_arr_sz}]' )
-  for bu2_idx, bu2_it in enumerate ( x_py_list ) : fu_params [bu2_idx] = x_py_list [bu2_idx]
+  for bu2_idx, bu2_it in enumerate (x_py_list) : fu_params [bu2_idx] = x_py_list [bu2_idx]
   return fu_params
-def jy_gf ( x_nm, *x_args ) : return JC_GR. invokeFunction ( x_nm, jf_jarray (x_args) )
-def jy_gm ( x_oj, x_nm, *x_args ) : return JC_GR. invokeMethod ( x_oj, x_nm, jf_jarray (x_args) )
+def jy_gf ( x_nm, *x_args ) : return JC_GR. invokeFunction ( x_nm, jf_gp (x_args) )
+def jy_gm ( x_oj, x_nm, *x_args ) : return JC_GR. invokeMethod ( x_oj, x_nm, jf_gp (x_args) )
 def jy_gc ( x_closure, *x_args ) :
   yu_closure = jy_ge (x_closure) if type(x_closure) is str else x_closure
   return jy_gm ( yu_closure, 'call', *x_args )
 def jf_gi (x_cls) : return jy_ge ( f'@groovy.transform.Immutable {x_cls}' ) # (g)roovy (i)mmutable class
 def jf_jcls (x_cls_nm) : return jy_gf ( 'gf_jcls', x_cls_nm )
+def jf_is_instance ( x_cls, x_oj ) : return jy_gf ( 'gf_is_instance', x_cls, x_oj )
 def jp_add_jar (x_jar_fn) : jy_gf ( 'gp_add_jar', x_jar_fn )
 
 for bu2_jar_fn in [
@@ -497,13 +522,33 @@ jy_ge ('''
   }
 ''')
 
-CjActorRef = jf_jcls ('akka.actor.ActorRef')
-CjAwait    = jf_jcls ('scala.concurrent.Await')
-CjDuration = jf_jcls ('scala.concurrent.duration.Duration')
-CjSystem   = jf_jcls ('java.lang.System')
+CjActorRef              = jf_jcls ('akka.actor.ActorRef')
+CjAwait                 = jf_jcls ('scala.concurrent.Await')
+CjBigInteger            = jf_jcls ('java.math.BigInteger')
+CjByteArrayInputStream  = jf_jcls ('java.io.ByteArrayInputStream')
+CjByteArrayOutputStream = jf_jcls ('java.io.ByteArrayOutputStream')
+CjDuration              = jf_jcls ('scala.concurrent.duration.Duration')
+CjMath                  = jf_jcls ('java.lang.Math')
+CjPatterns              = jf_jcls ('akka.pattern.Patterns')
+CjString                = jf_jcls ('java.lang.String')
+CjSystem                = jf_jcls ('java.lang.System')
+CjTimeout               = jf_jcls ('akka.util.Timeout')
 
 JC_JAVA_VR = CjSystem .getProperty ('java.version')
 JC_GROOVY_VR = jf_jcls ('groovy.lang.GroovySystem') .getVersion ()
+
+def jf_pixmap ( x_fn, x_format = 'PNG' ) : # Load image from file for using QPixmap in java
+  fu_qba = QByteArray ()
+  fu_qbf = QBuffer (fu_qba)
+  fu_qbf .open (QIODevice.WriteOnly)
+  QPixmap (x_fn) .save ( fu_qbf, x_format )
+  fu_qbf .close ()
+  fu_jbaos = CjByteArrayOutputStream ()
+  for bx2_it in fu_qba .data () : fu_jbaos .write (bx2_it)
+  del (fu_qba)
+  fu_jbais = CjByteArrayInputStream ( fu_jbaos .toByteArray () )
+  fu_jbaos .close ()
+  return fu_jbais
 
 class __DjExit : # (__)private mo(D)ule (g)lobal
   __dav_cx = LgCx ( GC_EC_NONE, None )
@@ -574,13 +619,17 @@ jy_ge ('''
 jy_ge ('''
   class CgAt extends akka.actor.AbstractActor { // (A)c(t)or
     final private long __cau_yi_at
-    CgAt ( final long x_yi_at ) { this.__cau_yi_at = x_yi_at }
+    CgAt ( final long x_yi_at ) {
+      this.__cau_yi_at = x_yi_at
+      gp_xr { gp_yn ( this.__cau_yi_at, 'cn_create', this ) }
+    }
     void preStart () {
-      gp_xr { gp_yn ( this.__cau_yi_at, 'cn_pre_start', this ) }
+      gp_xr { gp_yn ( this.__cau_yi_at, 'cn_pre_start' ) }
     }
     akka.actor.AbstractActor.Receive createReceive () {
       return receiveBuilder () .match ( Object.class, { x_letter ->
-        gp_xr { gp_yn ( this.__cau_yi_at, 'cn_receive', x_letter, getSender () ) }
+        final pu_sender = getSender ()
+        gp_xr { gp_yn ( this.__cau_yi_at, 'cn_receive', x_letter, pu_sender ) }
       } ) .build ()
     }
     void postStop () {
@@ -598,9 +647,13 @@ class CjAt (QObject) :
   def __init__ (self) :
     super () .__init__ ()
     self.cu_yi = gf_cllo (self)
-  def cn_pre_start ( self, x_at_org ) :
+  def cn_create ( self, x_at_org ) :
     try :
       self.cu_at_org = x_at_org
+      if hasattr ( self, 'create' ) : getattr ( self, 'create' ) ()
+    except : jp_request_exit ( GC_EC_ERROR, gf_exception_to_list () )
+  def cn_pre_start (self) :
+    try :
       if hasattr ( self, 'preStart' ) : getattr ( self, 'preStart' ) ()
     except : jp_request_exit ( GC_EC_ERROR, gf_exception_to_list () )
   def cn_receive ( self, x_letter, x_atr_sender ) :
@@ -625,7 +678,22 @@ def jf_mk_atr ( x_at, x_at_nm, x_arf = None ) :
   fu_at_nm = x_at.__class__.__name__ if x_at_nm == ':c' else ':a' if x_at_nm == None else x_at_nm
   return jy_gf ( 'gf_mk_atr', gf_yi (x_at), fu_at_nm, fu_arf )
 
+class TjUtil :
+  def tn_fx_set_eh ( self, x_xo, x_xo_eh_nm, x_yo_nethod_nm ) : # xo -> F(x) (o)bject, eh -> fx (e)vent (h)andler
+    jy_gc ( f"""{{ x_xo ->
+      x_xo.{x_xo_eh_nm} = {{ x2_ev -> gp_yn {self.cu_yi}, '{x_yo_nethod_nm}', x2_ev }}
+    }}""", x_xo  )
+  def tn_fx_add_cl ( self, x_property, x_yo_nethod_nm ) : # cl -> (c)hange (l)istener
+    jy_gc ( f"""{{ x_property ->
+      x_property .addListener ( {{ x2_obs, x2_old, x2_new -> gp_yn {self.cu_yi}, '{x_yo_nethod_nm}', x2_obs, x2_old, x2_new }} as javafx.beans.value.ChangeListener )
+    }}""", x_property  )
+  def tn_ak_fut_oc ( self, x_future, x_yo_nethod_nm ) : # ak -> (ak)ka, fut -> (fut)ure, oc -> (o)n(C)omplete
+    jy_gc ( f"""{{ x_future, x_dispatcher ->
+      x_future .onComplete ( {{ x2_throwable, x2_result -> gp_xr {{ gp_yn {self.cu_yi}, '{x_yo_nethod_nm}', x2_throwable, x2_result }} }} as akka.dispatch.OnComplete, x_dispatcher )
+    }}""", x_future, self .getContext () .dispatcher ()  )
+
 #
+# Main Skeleton
 #
 
 class DRun :
@@ -904,7 +972,7 @@ class WMain ( QMainWindow, TgWai ) :
           bv4_o_nop_so_far = 0
           for bu5_i_pg_no in range ( 1, bu3_i_nop+1 ) :
             bu5_i_pg = bu4_i_doc .getPage (bu5_i_pg_no)
-            bu5_i_pg_sz = bu5_i_pg .getPageSize ()
+            bu5_i_pg_sz = bu5_i_pg .getCropBox ()
             bu5_o_pg_cp = bu5_i_pg .copyAsFormXObject (bu4_o_doc)
             for _ in range (bu3_repeat) :
               bu6_o_pg = bu4_o_doc .addNewPage ( CjPageSize (bu5_i_pg_sz) )
@@ -961,3 +1029,4 @@ class OStart :
   
 if __name__ == '__main__':
   OStart .main ()
+
