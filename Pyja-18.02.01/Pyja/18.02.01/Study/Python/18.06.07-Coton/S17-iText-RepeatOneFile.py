@@ -932,7 +932,7 @@ class WMain ( QMainWindow, TgWai ) :
     nu_i_nop = self.wv_i_nop
     nu_repeat = self.wu_sb_repeat .value ()
     nu_o_nop = nu_i_nop * nu_repeat
-    self.wu_le_o_bn .setText ( f'{ gf_jn ( self.wu_le_i_bn .text () ) }-(Repeat1PDF)-({nu_i_nop:d}ⅹ{nu_repeat:d})-{nu_o_nop:d}-pages.pdf' )
+    self.wu_le_o_bn .setText ( f'{ gf_jn ( self.wu_le_i_bn .text () ) }-(RepeatOneFile)-({nu_i_nop:d}ⅹ{nu_repeat:d})-{nu_o_nop:d}-pages.pdf' )
     self.wu_le_o_nfo .setText ( f'( {nu_i_nop:,d} ⅹ {nu_repeat:,d} ) => {nu_o_nop:,d} pages' )
     self.wu_pb_do .setEnabled (True)
   def wn_pb_do_clicked (self) :
@@ -970,14 +970,20 @@ class WMain ( QMainWindow, TgWai ) :
           self .wn_log_info ( 'Writing output file ( may take a long time ) ...')
           bu4_o_doc = CjPdfDocument ( CjPdfWriter (bu3_o_fn) .setSmartMode (True) )
           bv4_o_nop_so_far = 0
-          for _ in range (bu3_repeat) :
+          bu4_cache = {}
+          for bu5_i_pg_no in range ( 1, bu3_i_nop+1 ) :
+            bu5_i_pg = bu4_i_doc .getPage (bu5_i_pg_no)
+            bu5_o_pg_sz = bu5_i_pg .getCropBox ()
+            bu5_o_pg_cp = bu5_i_pg .copyAsFormXObject (bu4_o_doc)
+            bu4_cache [bu5_i_pg_no] = [ bu5_o_pg_sz, bu5_o_pg_cp ]
+          for bu5_iteration in range ( 1, bu3_repeat+1 ) :
+            self .wn_log_info ( f'New iteration {bu5_iteration} with page number {bv4_o_nop_so_far+1}')
             for bu6_i_pg_no in range ( 1, bu3_i_nop+1 ) :
-              bu6_i_pg = bu4_i_doc .getPage (bu6_i_pg_no)
-              bu6_i_pg_sz = bu6_i_pg .getCropBox ()
-              bu6_o_pg_cp = bu6_i_pg .copyAsFormXObject (bu4_o_doc)
-              bu6_o_pg = bu4_o_doc .addNewPage ( CjPageSize (bu6_i_pg_sz) )
+              bu6_o_pg_sz = bu4_cache [bu6_i_pg_no] [0]
+              bu6_o_pg_cp = bu4_cache [bu6_i_pg_no] [1]
+              bu6_o_pg = bu4_o_doc .addNewPage ( CjPageSize (bu6_o_pg_sz) )
               CjPdfCanvas (bu6_o_pg) .addXObject ( bu6_o_pg_cp, 0, 0 )
-              bv4_o_nop_so_far += bu3_repeat
+              bv4_o_nop_so_far += 1
               self.wu_pgb .setValue (bv4_o_nop_so_far)
               GC_QAPP .processEvents ()
         finally :
