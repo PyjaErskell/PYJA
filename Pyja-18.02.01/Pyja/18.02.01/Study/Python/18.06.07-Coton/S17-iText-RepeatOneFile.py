@@ -832,7 +832,7 @@ class WMain ( QMainWindow, TgWai ) :
       self.wu_hbl_cfg .setSpacing (1)
       def ff3_new_sb_repeat () :
         fu3_sb = QSpinBox ()
-        fu3_sb .setMinimum (2)
+        fu3_sb .setMinimum (1)
         fu3_sb .setMaximum (100_000)
         fu3_sb .setValue ( fu3_sb .minimum () )
         fu3_sb .setPrefix ( 'repeat the PDF file ')
