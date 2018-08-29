@@ -737,8 +737,9 @@ class WAtXMain ( CjAt, TjUtil, TgWai ) :
     JC_LOG .debug ( 'Stage showing ...' )
     self .wn_change_font ()
     self .wn_center_on_screen ()
+  def wn_stage_on_shown ( self, x_ev ) :
+    JC_LOG .info ( 'Stage shown ...' )
     self .startTimer (300)
-  def wn_stage_on_shown ( self, x_ev ) : JC_LOG .info ( 'Stage shown ...' )
   def wn_stage_on_close_request ( self, x_ev ) :
     JC_LOG .info ( self .tm_wai ( 'About to quit ...' ) )
     jp_request_exit (GC_EC_SUCCESS)
