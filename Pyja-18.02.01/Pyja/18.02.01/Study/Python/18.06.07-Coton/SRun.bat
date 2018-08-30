@@ -17,6 +17,7 @@ SET SC_PYJA_RT=%CD%
 FOR %%F IN (%SC_PYJA_RT%) DO SET SC_PYJA_NM=%%~NXF
 POPD
 
+CALL "%SC_PYJA_HM%\Config\SSet-KAPA.bat"
 CALL "%SC_PYJA_HM%\Config\SSet-JDK-8.bat"
 CALL "%SC_PYJA_HM%\Config\SSet-Anaconda3-5.1.0.bat"
 
@@ -38,6 +39,8 @@ ECHO PYJA name =^> %SC_PYJA_NM%
 ECHO PYJA version =^> %SC_PYJA_VR%
 ECHO PYJA root =^> %SC_PYJA_RT%
 ECHO PYJA home =^> %SC_PYJA_HM%
+
+ECHO KAPA home =^> %SC_KAPA_HM%
 
 ECHO Java home =^> %JAVA_HOME%
 ECHO Java maximum heap size option =^> %SC_JAVA_XMX%

@@ -11,6 +11,7 @@ export SC_PYJA_VR="$( basename "${SC_PYJA_HM}" )"
 export SC_PYJA_RT="$( cd "$SC_PYJA_HM/.." && pwd )"
 export SC_PYJA_NM="$( basename "${SC_PYJA_RT}" )"
 
+source "$SC_PYJA_HM/Config/SSet-KAPA.sh"
 source "$SC_PYJA_HM/Config/SSet-JDK-8.sh"
 source "$SC_PYJA_HM/Config/SSet-Anaconda3-5.1.0.sh"
 
@@ -32,6 +33,8 @@ echo "PYJA name => $SC_PYJA_NM"
 echo "PYJA version => $SC_PYJA_VR"
 echo "PYJA root => $SC_PYJA_RT"
 echo "PYJA home => $SC_PYJA_HM"
+
+echo "KAPA home => $SC_KAPA_HM"
 
 echo "Java home => $JAVA_HOME"
 echo "Java maximum heap size option => $SC_JAVA_XMX"
