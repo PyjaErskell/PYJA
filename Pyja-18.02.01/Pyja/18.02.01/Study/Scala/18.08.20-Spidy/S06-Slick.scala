@@ -187,20 +187,19 @@ class CAtSlick ( cu_atr_main : ActorRef ) extends Actor {
   val cu_messages = TableQuery [TMessage]
   def receive = {
     case 'LCreateTable => {
-      cn_display_info ( gf_wai ( "Creating database table ..." ) )
+      cn_display (CLogLevel.INFO) ( gf_wai ( "Creating database table ..." ) )
       cm_exec (cu_messages.schema.create)
     }
     case LAddMessage (bu2_it) => {
-      cn_display_info ( gf_wai ( s"  adding message ${bu2_it} ..." ) )
+      cn_display (CLogLevel.INFO) ( gf_wai ( s"  adding message ${bu2_it} ..." ) )
       cm_exec ( cu_messages += bu2_it )
     }
-    case 'LSelectAll => gp_log_seq (cn_display_info) { "Selecting all messages" } { cm_exec (cu_messages.result) .map ( it => it ) }
-    case LSelectSender (bu2_it) => gp_log_seq (cn_display_info) { s"Selecting only messages from ${bu2_it}" } {
+    case 'LSelectAll => gp_log_seq ( cn_display (CLogLevel.INFO) ) { "Selecting all messages" } { cm_exec (cu_messages.result) .map ( it => it ) }
+    case LSelectSender (bu2_it) => gp_log_seq ( cn_display (CLogLevel.INFO) ) { s"Selecting only messages from ${bu2_it}" } {
       cm_exec ( cu_messages .filter ( _.co_sender === bu2_it ) .result ) .map ( it => it )
     }
-    case bu2_invalid => cn_display ( CLogLevel.ERROR, gf_wai ( s"Message ${bu2_invalid} not recognized" ) )
+    case bu2_invalid => cn_display (CLogLevel.ERROR) ( gf_wai ( s"Message ${bu2_invalid} not recognized" ) )
   }
   def cm_exec [T] ( x_program : DBIO [T] ) : T = scala.concurrent.Await .result ( cu_db.run (x_program), 2.seconds )
-  def cn_display ( x_level : CLogLevel, x_msg : String ) = cu_atr_main ! LDisplay ( x_level, x_msg )
-  def cn_display_info ( x_msg : String ) = cn_display ( CLogLevel.INFO, x_msg )
+  def cn_display ( x_level : CLogLevel ) ( x_msg : String ) = cu_atr_main ! LDisplay ( x_level, x_msg )
 }

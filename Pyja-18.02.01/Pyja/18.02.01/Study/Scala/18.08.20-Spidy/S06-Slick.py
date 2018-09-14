@@ -878,7 +878,7 @@ class WAtQtMain ( CjAt, TjUtil, TgWai ) :
       x2_it .setCentralWidget (self.wu_te_log)
       x2_it .showEvent = self.wn_mw_show_event
       x2_it .closeEvent = self.wn_mw_close_event
-      x2_it .resize ( 888, 357 )
+      x2_it .resize ( 888, 379 )
       x2_it .show ()
       x2_it .raise_ ()
       return x2_it
@@ -919,7 +919,7 @@ class DBody :
     cls .__dap_fini ()
   @classmethod
   def __dap_init (cls) :
-    global RMessage, CAtSlick, LAddMessage, LSelectAll, LSelectSender
+    global RMessage, CAtSlick, LAddMessage, LSelectSender
     RMessage = jf_jcls ('RMessage')
     CAtSlick = jf_jcls ('CAtSlick')
     LAddMessage = jf_jcls ('LAddMessage')
