@@ -802,27 +802,21 @@ class WMain ( QMainWindow, TgWai ) :
       self.wu_hbl_cfg = QHBoxLayout ()
       self.wu_hbl_cfg .setContentsMargins ( 0, 0, 0, 0 )
       self.wu_hbl_cfg .setSpacing (1)
-      def ff3_new_dsb (x3_px) :
+      def ff3_new_dsb ( x3_px, x3_val ) :
         fu3_dsb = QDoubleSpinBox ()
         fu3_dsb .setMinimum (1)
-        fu3_dsb .setMaximum (10_000)
-        fu3_dsb .setValue (100)
+        fu3_dsb .setMaximum (1_000_000)
+        fu3_dsb .setValue (x3_val)
         fu3_dsb .setPrefix ( f'{x3_px} ')
-        fu3_dsb .setSuffix ( ' %')
+        fu3_dsb .setSuffix ( ' mm')
         fu3_dsb .setSingleStep (1)
         fu3_dsb .setAlignment (Qt.AlignRight)
         return fu3_dsb
-      def ff3_new_cb_lock_aspect_ratio () :
-        fu3_cb = QCheckBox ('Lock aspect ratio')
-        return fu3_cb
-      self.wu_dsb_width_percentage = ff3_new_dsb ('Width')
-      self.wu_dsb_height_percentage = ff3_new_dsb ('Height')
-      self.wu_cb_lock_aspect_ratio = ff3_new_cb_lock_aspect_ratio ()
-      self.wu_hbl_cfg .addWidget (self.wu_dsb_width_percentage)
+      self.wu_dsb_width_mm = ff3_new_dsb ( 'Width', 210 )
+      self.wu_dsb_height_mm = ff3_new_dsb ( 'Height', 297 )
+      self.wu_hbl_cfg .addWidget (self.wu_dsb_width_mm)
       self.wu_hbl_cfg .addItem ( QSpacerItem ( 10, 1, QSizePolicy.Fixed, QSizePolicy.Minimum ) )
-      self.wu_hbl_cfg .addWidget (self.wu_dsb_height_percentage)
-      self.wu_hbl_cfg .addItem ( QSpacerItem ( 10, 1, QSizePolicy.Fixed, QSizePolicy.Minimum ) )
-      self.wu_hbl_cfg .addWidget (self.wu_cb_lock_aspect_ratio)
+      self.wu_hbl_cfg .addWidget (self.wu_dsb_height_mm)
       self.wu_hbl_cfg .addItem ( QSpacerItem ( 10, 1, QSizePolicy.Fixed, QSizePolicy.Minimum ) )
       self.wu_hbl_cfg .addItem ( QSpacerItem ( 1, 1, QSizePolicy.Expanding, QSizePolicy.Minimum ) )
       self.wu_wt_cfg = QWidget ()
@@ -883,9 +877,8 @@ class WMain ( QMainWindow, TgWai ) :
 
     self.wu_lo .setColumnStretch ( 1, 1 )
     self.wu_pb_i_fn.clicked .connect (self.wn_pb_i_fn_clicked)
-    self.wu_dsb_width_percentage.valueChanged .connect (self.wn_config_changed)
-    self.wu_dsb_height_percentage.valueChanged .connect (self.wn_config_changed)
-    self.wu_cb_lock_aspect_ratio.stateChanged .connect ( lambda bx2_stage : self .wn_config_changed () )
+    self.wu_dsb_width_mm.valueChanged .connect (self.wn_config_changed)
+    self.wu_dsb_height_mm.valueChanged .connect (self.wn_config_changed)
     self.wu_pb_do.clicked .connect (self.wn_pb_do_clicked)
 
     def pp2_move_center () :
@@ -917,21 +910,20 @@ class WMain ( QMainWindow, TgWai ) :
       self.wn_log_error ( 'Check your PDF file or this program logic !!!' )
   def wn_config_changed (self) :
     nu_o_nop = self.wv_i_nop
-    if self.wu_cb_lock_aspect_ratio .isChecked () : self.wu_dsb_height_percentage .setValue ( self.wu_dsb_width_percentage .value () )
-    self.wu_dsb_height_percentage .setEnabled ( not self.wu_cb_lock_aspect_ratio .isChecked () )
-    nu_width_percentage = self.wu_dsb_width_percentage .value ()
-    nu_height_percentage = self.wu_dsb_height_percentage .value ()
-    if self.wv_i_nop < 1 or ( nu_width_percentage == 100 and nu_height_percentage == 100 ) :
+    nu_width_percentage = self.wu_dsb_width_mm .value ()
+    nu_height_percentage = self.wu_dsb_height_mm .value ()
+    if self.wv_i_nop < 1 :
       self.wu_le_o_bn .setText ('')
       self.wu_pb_do .setEnabled (False)
       return
-    self.wu_le_o_bn .setText ( f'{ gf_jn ( self.wu_le_i_bn .text () ) }-(PageScaling)-({nu_width_percentage:.2f}x{nu_height_percentage:.2f})-Percent-{nu_o_nop:d}-page(s).pdf' )
+    self.wu_le_o_bn .setText ( f'{ gf_jn ( self.wu_le_i_bn .text () ) }-(PageScaling)-({nu_width_percentage:.2f}x{nu_height_percentage:.2f})-mm-{nu_o_nop:d}-page(s).pdf' )
     self.wu_le_o_nfo .setText ( f'{nu_o_nop:,d} pages' )
     self.wu_pb_do .setEnabled (True)
   def wn_pb_do_clicked (self) :
     nu_st = datetime.now ()
     nv_cancelled = False
     gp_log_header ( self.wn_log_info, 'Start processing ...', 23 )
+    def nf2_mm2pt (x2_mm) : return x2_mm / 25.4 * 72.0
     def nf2_scale_bx ( x2_bx, x2_width_ratio, x2_height_ratio ) :
       return CjRectangle ( x2_bx .getX () * x2_width_ratio, x2_bx .getY () * x2_height_ratio, x2_bx .getWidth () * x2_width_ratio, x2_bx .getHeight () * x2_height_ratio )
     def np2_do () :
@@ -957,8 +949,6 @@ class WMain ( QMainWindow, TgWai ) :
         self.wu_pgb .setMaximum (bu3_i_nop)
         self.wu_pgb .setValue (0)
         try :
-          bu4_width_ratio = self.wu_dsb_width_percentage .value () / 100.0
-          bu4_height_ratio = self.wu_dsb_height_percentage .value () / 100.0
           self .wn_log_info ( 'Opening input file ...')
           bu4_i_doc = CjPdfDocument ( CjPdfReader ( gf_pj ( self .wu_le_i_pn .text (), self.wu_le_i_bn .text () ) ) )
           self .wn_log_info ( 'Opening output file ...')
@@ -974,14 +964,16 @@ class WMain ( QMainWindow, TgWai ) :
             bu5_i_pg_cb = bu5_i_pg .getCropBox ()
             bu5_i_pg .setCropBox (bu5_i_pg_mb)
             bu5_o_pg_cp = bu5_i_pg .copyAsFormXObject (bu4_o_doc)
-            bu5_scaled_mb = nf2_scale_bx ( bu5_i_pg_mb, bu4_width_ratio, bu4_height_ratio )
+            bu5_width_ratio = nf2_mm2pt ( self.wu_dsb_width_mm .value () ) / bu5_i_pg_tb .getWidth ()
+            bu5_height_ratio = nf2_mm2pt ( self.wu_dsb_height_mm .value () ) / bu5_i_pg_tb .getHeight ()
+            bu5_scaled_mb = nf2_scale_bx ( bu5_i_pg_mb, bu5_width_ratio, bu5_height_ratio )
             bu5_o_pg = bu4_o_doc .addNewPage ( CjPageSize (bu5_scaled_mb) )
             bu5_o_pg .setMediaBox (bu5_scaled_mb)
-            bu5_o_pg .setBleedBox ( nf2_scale_bx ( bu5_i_pg_bb, bu4_width_ratio, bu4_height_ratio ) )
-            bu5_o_pg .setTrimBox ( nf2_scale_bx ( bu5_i_pg_tb, bu4_width_ratio, bu4_height_ratio ) )
-            bu5_o_pg .setCropBox ( nf2_scale_bx ( bu5_i_pg_cb, bu4_width_ratio, bu4_height_ratio ) )
+            bu5_o_pg .setBleedBox ( nf2_scale_bx ( bu5_i_pg_bb, bu5_width_ratio, bu5_height_ratio ) )
+            bu5_o_pg .setTrimBox ( nf2_scale_bx ( bu5_i_pg_tb, bu5_width_ratio, bu5_height_ratio ) )
+            bu5_o_pg .setCropBox ( nf2_scale_bx ( bu5_i_pg_cb, bu5_width_ratio, bu5_height_ratio ) )
             bu5_canvas = CjPdfCanvas (bu5_o_pg)
-            bu5_canvas .concatMatrix ( CjAffineTransform .getScaleInstance ( bu4_width_ratio, bu4_height_ratio ) )
+            bu5_canvas .concatMatrix ( CjAffineTransform .getScaleInstance ( bu5_width_ratio, bu5_height_ratio ) )
             bu5_canvas .addXObject ( bu5_o_pg_cp, bu5_scaled_mb .getX (), bu5_scaled_mb .getY () )
             bv4_o_nop_so_far += 1
             self.wu_pgb .setValue (bv4_o_nop_so_far)
