@@ -1,0 +1,54 @@
+@ECHO OFF
+SETLOCAL
+
+SET PATH=%SystemRoot%\system32
+
+SET SC_THIS_BN=%~NX0
+SET SC_THIS_JN=%~N0
+
+PUSHD "%~DP0"
+CD "%~DP0"
+SET SC_MILO_PN=%CD%
+CD "%SC_MILO_PN%\..\..\.."
+SET SC_PYJA_HM=%CD%
+FOR %%F IN (%SC_PYJA_HM%) DO SET SC_PYJA_VR=%%~NXF
+CD "%SC_PYJA_HM%\.."
+SET SC_PYJA_RT=%CD%
+FOR %%F IN (%SC_PYJA_RT%) DO SET SC_PYJA_NM=%%~NXF
+POPD
+
+CALL "%SC_PYJA_HM%\Config\SSet-KAPA.bat"
+CALL "%SC_MILO_PN%\SSet-QtJambi-4.8.7-x64.bat"
+CALL "%SC_PYJA_HM%\Config\JRuby\SSet-JRuby-9.2.5.0.bat"
+
+SET JAVA_HOME=%SC_J8_HM%
+
+SET JRUBY_HOME=%SC_JRUBY_HM%
+SET RUBYLIB=%SC_MILO_PN%
+
+SET QT_PLUGIN_PATH=%SC_QTJ_PLUGIN_PN%
+
+SET SC_PATH=%PATH%
+
+ECHO PATH =^> %SC_PATH%
+
+ECHO MILO path =^> %SC_MILO_PN%
+ECHO KAPA home =^> %SC_KAPA_HM%
+ECHO PYJA name =^> %SC_PYJA_NM%
+ECHO PYJA version =^> %SC_PYJA_VR%
+ECHO PYJA root =^> %SC_PYJA_RT%
+ECHO PYJA home =^> %SC_PYJA_HM%
+
+ECHO KAPA home =^> %SC_KAPA_HM%
+
+ECHO Java home =^> %JAVA_HOME%
+ECHO Java maximum heap size option =^> %SC_JAVA_XMX%
+
+ECHO JRuby home =^> %JRUBY_HOME%
+ECHO Qt Jambi home =^> %SC_QTJ_HM%
+
+SET SC_ALL_JARS="%SC_MILO_PN%\ecu\ORun.jar";"%SC_JRUBY_JAR_FN%"
+
+"%SC_J8_X_FN%" -Dfile.encoding=UTF-8 "%SC_JAVA_XMX%" -cp %SC_ALL_JARS% ORun %*
+
+ENDLOCAL

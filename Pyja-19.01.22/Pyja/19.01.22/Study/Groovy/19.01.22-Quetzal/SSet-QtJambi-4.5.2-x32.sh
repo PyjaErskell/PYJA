@@ -1,0 +1,9 @@
+source "$SC_PYJA_HM/Config/JDK/SSet-JDK-6.sh"
+export SC_J_D=32
+source "$SC_PYJA_HM/Config/QtJambi/x$SC_J_D/SSet-QtJambi-4.5.2.sh"
+export SC_JAVA_XMX=-Xmx1700m
+export SC_J_HM=$SC_J6_HM
+export SC_J_X_FN=$SC_J6_X_FN
+export SC_JC_X_FN=$SC_J6C_X_FN
+export SC_JH_X_FN=$SC_J6H_X_FN
+export SC_JR_X_FN=$SC_J6R_X_FN

@@ -1,0 +1,9 @@
+source "$SC_PYJA_HM/Config/JDK/x64/SSet-JDK-8.sh"
+export SC_J_D=64
+source "$SC_PYJA_HM/Config/QtJambi/x$SC_J_D/SSet-QtJambi-4.8.6.sh"
+export SC_JAVA_XMX=-Xmx9g
+export SC_J_HM=$SC_J8_HM
+export SC_J_X_FN=$SC_J8_X_FN
+export SC_JC_X_FN=$SC_J8C_X_FN
+export SC_JH_X_FN=$SC_J8H_X_FN
+export SC_JR_X_FN=$SC_J8R_X_FN
