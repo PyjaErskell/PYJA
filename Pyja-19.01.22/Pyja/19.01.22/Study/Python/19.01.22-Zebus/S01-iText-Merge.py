@@ -729,8 +729,10 @@ import random
 
 from PyQt5.QtCore import QRect
 from PyQt5.QtGui import QFontDatabase
+from PyQt5.QtGui import QKeySequence
 from PyQt5.QtGui import QTextOption
 from PyQt5.QtWidgets import QAbstractItemView
+from PyQt5.QtWidgets import QAction
 from PyQt5.QtWidgets import QCheckBox
 from PyQt5.QtWidgets import QDoubleSpinBox
 from PyQt5.QtWidgets import QFileDialog
@@ -910,9 +912,14 @@ class WMain ( QMainWindow, TgWai ) :
       pu2_fg = self .frameGeometry ()
       pu2_fg .moveCenter (pu2_cp)
       self .move ( pu2_fg .topLeft () )
+    self.wu_qw_a_exit = QAction ( 'E&xit', self )
+    self.wu_qw_a_exit .setShortcut ( QKeySequence ('Alt+X') )
+    self .addAction (self.wu_qw_a_exit)
+    self.wu_qw_a_exit.triggered .connect (self.won_qw_a_exit_triggered)
     self .show ()
     pp2_move_center ()
     self .raise_ ()
+    for bu2_it in gf_banner () : self.wu_te_log .append (bu2_it)
   def won_items_or_selection_changed (self) :
     nu_items_total = self.wu_lw_inputs .count ()
     nu_selected_total = len ( self.wu_lw_inputs .selectedItems () )
@@ -1181,12 +1188,17 @@ class WMain ( QMainWindow, TgWai ) :
     JC_LOG .error (x_msg)
     self.wu_te_log .append ( f"<font color=red>[E] { self. wm_2_html (x_msg) }</font>" )
   def wm_2_html ( self, x_msg ) :
-    nv_msg = re.sub ( r'(?:\r\n|\r|\n)', '<br>', x_msg )
+    nv_msg = re.sub ( r'(?:\<)', '&lt;', x_msg )
+    nv_msg = re.sub ( r'(?:\>)', '&gt;', nv_msg )
+    nv_msg = re.sub ( r'(?:\r\n|\r|\n)', '<br>', nv_msg )
     return nv_msg .replace ( ' ', '&nbsp;' )
   def __del__ (self) : self .wn_fini ()
   def wn_fini (self) : JC_LOG .info ( self.tm_wai ('Finalizing ...') )
-  def closeEvent ( self, x_ev ) :
-    JC_LOG .info ( self.tm_wai ( 'Closing ...' ) )
+  def closeEvent ( self, x_ev ) : self .wn_quit ()
+  def won_qw_a_exit_triggered (self) : self .wn_quit ()
+  def wn_quit (self) :
+    JC_LOG .info ( self .tm_wai ( 'About to quit ...' ) )
+    GC_QAPP .quit ()
     jp_request_exit (GC_EC_SUCCESS)
 
 class DBody :
