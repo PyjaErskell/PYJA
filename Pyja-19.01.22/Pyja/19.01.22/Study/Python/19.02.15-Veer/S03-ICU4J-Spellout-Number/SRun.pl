@@ -40,6 +40,7 @@ BEGIN {
   }
 
   use lib "${\ gf_ap ( gf_os_env ('SC_PERL_HM'), GC_FALSE ) }/site/lib";
+  use lib "${\ gf_ap ( gf_os_env ('SC_PERL_HM'), GC_FALSE ) }/vendor/lib";
 
   use Config;
   use Log::Log4perl qw(:easy);

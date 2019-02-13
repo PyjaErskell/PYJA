@@ -1,2 +1,0 @@
-SET SC_PERL_HM=%SC_KAPA_HM%\19.01.22\Vindue\x64\ActivePerl\5.26.3
-SET SC_PERL_EXE_FN=%SC_PERL_HM%\bin\perl

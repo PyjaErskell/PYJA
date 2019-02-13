@@ -13,14 +13,11 @@ export SC_PYJA_NM="$( basename "${SC_PYJA_RT}" )"
 export SC_PYJA_VR="$( basename "${SC_PYJA_HM}" )"
 
 source "$SC_PYJA_HM/Config/SSet-KAPA.sh"
-source "$SC_PYJA_HM/Config/ActivePerl/x64/SSet-ActivePerl-5.26.3.sh"
+source "$SC_PYJA_HM/Config/CitrusPerl/x64/SSet-CitrusPerl-5.24.1.sh"
 source "$SC_PYJA_HM/Config/OpenJDK/x64/SSet-JDK-11.0.2.sh"
 source "$SC_PYJA_HM/Config/OpenJFX/x64/SSet-JFX-11.sh"
 source "$SC_PYJA_HM/Config/Anaconda/x64/SSet-Anaconda-5.1.0.sh"
 
-export PERL5LIB="$SC_PERL_HM/lib"
-
-export DYLD_LIBRARY_PATH="$SC_PERL_HM/lib/CORE"
 export LD_LIBRARY_PATH="$SC_PYTHON_HM/lib"
 
 export SC_PATH=$PATH
