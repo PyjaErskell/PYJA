@@ -1,1 +1,1 @@
-SET SC_KAPA_HM=C:\Kapa
+SET SC_KAPA_HM=C:\Program Files\Kapa
