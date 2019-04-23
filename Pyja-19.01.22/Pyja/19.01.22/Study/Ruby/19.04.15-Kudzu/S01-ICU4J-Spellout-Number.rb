@@ -260,7 +260,7 @@ GC_TOTAL_MEMORY = $yu_psutil .virtual_memory .total
 GC_HOST_NM = Socket .gethostname
 GC_CUSR = Etc .getlogin  # current user
 
-GC_QAPP = QApplication.new []
+def gp_qapp; $gu_qapp = QApplication.new []; end
 
 def gf_process x_pid; $yu_psutil.Process .new x_pid; end
 def gf_os_available_memory; $yu_psutil .virtual_memory .available; end
@@ -323,7 +323,13 @@ def gp_request_exit x_ec, x_ex = nil
   gp_log_exception 'Following error occurs !!!', x_ex unless x_ex .nil?
   GC_LOG.info "Exit code => #{x_ec}"
   GC_LOG.info "Elpased #{ $yu_datetime.now - GC_APP_ST } ..."
-  exit x_ec
+  $yu_os ._exit x_ec
+end
+
+def gy_rr &xy_block # (r)uby (r)un
+  xy_block .call
+rescue Exception => bu2_ex
+  gp_request_exit GC_EC_ERROR, bu2_ex
 end
 
 #---------------------------------------------------------------
@@ -396,16 +402,16 @@ class HSpellout
     @hu_fixed_fnt = QFontDatabase.systemFont QFontDatabase.FixedFont
     @hu_it = HyQAbstractTableModel .new self
   end
-  def rowCount x_parent = QModelIndex .new; @hu_total; end
-  def columnCount x_parent = QModelIndex .new; 2; end
-  def headerData x_column, x_orientation, x_role
+  def rowCount x_parent = QModelIndex .new; gy_rr {@hu_total}; end
+  def columnCount x_parent = QModelIndex .new; gy_rr {2}; end
+  def headerData x_column, x_orientation, x_role; gy_rr {
     if x_role == Qt.DisplayRole and x_orientation == Qt.Horizontal
       return QVariant .new 'Number' if x_column == 0
       return QVariant .new 'Spell out' if x_column == 1
     end
     QVariant .new
-  end
-  def data x_index, x_role
+  } end
+  def data x_index, x_role; gy_rr {
     return QVariant .new unless x_index .isValid
     case x_role
     when Qt.DisplayRole
@@ -422,7 +428,7 @@ class HSpellout
       return @hu_fixed_fnt if bu2_col == 0
     end
     QVariant .new
-  end
+  } end
 end
 
 class WMain
@@ -431,7 +437,7 @@ class WMain
     def nf2_it
       QMainWindow .new .tap { |x_it|
         x_it .setWindowTitle GC_APP_NM
-        yp_sa x_it, 'closeEvent', ->(x_ev_close) {__wan_quit}
+        yp_sa x_it, 'closeEvent', ->(x_ev_close) { gy_rr {__wan_quit} }
         x_it .setCentralWidget QWidget .new .tap { |x_cw|
           x_cw .setLayout QVBoxLayout .new .tap { |x_lo|
             @wu_tv = nf2_tv
@@ -450,7 +456,7 @@ class WMain
         x_tv .horizontalHeader .setStretchLastSection true
         x_tv .setSelectionBehavior QAbstractItemView.SelectRows
         x_tv .setSelectionMode QAbstractItemView.SingleSelection
-        yp_sa x_tv, 'keyboardSearch', ->(x_search) {}
+        yp_sa x_tv, 'keyboardSearch', ->(x_search) { gy_rr {} }
         x_tv .setModel ( HSpellout .new 32345678 ) .hu_it
         x_tv .scrollToBottom
       }
@@ -459,7 +465,7 @@ class WMain
   end
   def __wan_quit
     GC_LOG .info  'About to quit ...'
-    GC_QAPP .quit
+    $gu_qapp .quit
   end
   def __wan_move_center x_it
     nu_cp = QDesktopWidget .new .availableGeometry .center # center point
@@ -471,9 +477,10 @@ end
 
 module DBody
   def self.dp_it
-    GC_QAPP .setStyle 'fusion'
+    gp_qapp
+    $gu_qapp .setStyle 'fusion'
     WMain .new
-    GC_QAPP .exec_
+    $gu_qapp .exec_
   end
 end
 
