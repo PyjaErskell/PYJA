@@ -30,9 +30,11 @@ GC_PYJA_VER_MAJ = GC_PYJA_YEA # Major
 GC_PYJA_VER_MIN = GC_PYJA_MON # Minor
 GC_PYJA_VER_PAT = GC_PYJA_DAY # Patch
 
+GC_KAPA_HM_SYM = '@^'
 GC_PYJA_RT_SYM = '@`'
 GC_PYJA_HM_SYM = '@~'
 GC_MILO_PN_SYM = '@!'
+GC_TONO_HM_SYM = '@*'
 
 GC_EC_NONE     = -200
 GC_EC_SHUTDOWN = -199
@@ -60,7 +62,6 @@ def gf_xi x_it; File .exist? x_it; end
 def gf_id x_it; File .directory? x_it; end
 def gf_if x_it; File .file? x_it; end
 def gf_pj *x_args; File .join x_args; end
-Object .alias_method :gf_jar_pj, :gf_pj
 def gp_mp x_pn; FileUtils .mkdir_p x_pn if not gf_id x_pn; end
 def gp_rp x_pn # (r)emove (p)ath
   FileUtils .remove_dir x_pn if gf_id x_pn
@@ -78,11 +79,15 @@ end
 def gf_pn x_it, x_chedk_id = false; ( x_chedk_id and gf_id x_it ) ? (x_it) : ( File .dirname x_it ); end # (p)ath (n)ame
 def gf_on x_it, x_chedk_id = false; gf_bn ( gf_pn x_it, x_chedk_id ); end # f(o)lder (n)ame
 
+$gu_jar_fn_list = []
+def gf_jar_fn x_jar_fn; $gu_jar_fn_list << x_jar_fn; x_jar_fn; end
+def gf_jar_pj *x_args; gf_jar_fn File .join x_args; end
+
 GC_KAPA_HM   = gf_ap gf_os_env(:SC_KAPA_HM)
 GC_PYJA_RT   = gf_ap gf_os_env(:SC_PYJA_RT)
 GC_PYJA_HM   = gf_ap gf_os_env(:SC_PYJA_HM)
 GC_MILO_PN   = gf_ap gf_os_env(:SC_MILO_PN)
-GC_MILO_NM   = gf_bn GC_MILO_PN
+GC_TONO_HM   = gf_ap gf_os_env(:SC_TONO_HM)
 
 def gf_replace_with_px_symbol x_pn, x_px_path, x_px_symbol
   fu_pn = gf_ap x_pn
@@ -97,15 +102,12 @@ def gf_replace_with_px_symbol x_pn, x_px_path, x_px_symbol
     fu_pn
   end
 end
-def gf_to_prs x_pn # to (p)yja (r)oot (s)ymbol
-  gf_replace_with_px_symbol x_pn, GC_PYJA_RT, GC_PYJA_RT_SYM
-end
-def gf_to_phs x_pn # to (p)yja (h)ome (s)ymbol
-  gf_replace_with_px_symbol x_pn, GC_PYJA_HM, GC_PYJA_HM_SYM
-end
-def gf_to_mps x_pn # to (m)ilo (p)ath (s)ymbol
-  gf_replace_with_px_symbol x_pn, GC_MILO_PN, GC_MILO_PN_SYM
-end
+def gf_to_khs x_pn; gf_replace_with_px_symbol x_pn, GC_KAPA_HM, GC_KAPA_HM_SYM; end # to (k)apa (h)ome (s)ymbol
+def gf_to_prs x_pn; gf_replace_with_px_symbol x_pn, GC_PYJA_RT, GC_PYJA_RT_SYM; end # to (p)yja (r)oot (s)ymbol
+def gf_to_phs x_pn; gf_replace_with_px_symbol x_pn, GC_PYJA_HM, GC_PYJA_HM_SYM; end # to (p)yja (h)ome (s)ymbol
+def gf_to_mps x_pn; gf_replace_with_px_symbol x_pn, GC_MILO_PN, GC_MILO_PN_SYM; end # to (m)ilo (p)ath (s)ymbol
+def gf_to_ths x_pn; gf_replace_with_px_symbol x_pn, GC_TONO_HM, GC_TONO_HM_SYM; end # to (t)ono (h)ome (s)ymbol
+def gf_to_kms x_pn; fu_khs = gf_to_khs x_pn; ( x_pn == fu_khs ) ?  ( gf_to_mps x_pn ) : fu_khs; end # to khs or mps
 
 #---------------------------------------------------------------
 # Java (Global)
@@ -222,16 +224,17 @@ HyQAbstractTableModel = yf_e 'HQAbstractTableModel'
 GC_JAVA_HM  = gf_ap gf_os_env(:SC_J8_HM)
 GC_PYTHON_HM = gf_ap gf_os_env(:SC_PYTHON_HM)
 
-GC_APP_ARGV = ARGV
-GC_APP_CMD = $yu_psutil.Process .new .cmdline .to_a
-GC_APP_EXE_FN = gf_ap $yu_sys.executable
-GC_APP_OS_ENV_PATHS = ( gf_os_env :SC_PATH ) .split GC_PASA
-GC_APP_PID = Process.pid
-GC_APP_SCRIPT_FN = gf_ap $0
-GC_APP_ST = $yu_datetime .strptime ( $__gau_app_st .strftime '%F %T' ), '%Y-%m-%d %H:%M:%S'
-GC_APP_START_UP_PN = gf_ap Dir .getwd
+GC_MILO_NM = gf_bn GC_MILO_PN
 
-GC_APP_NM = gf_jn GC_APP_SCRIPT_FN
+GC_TONO_ARGV = ARGV
+GC_TONO_CMD = $yu_psutil.Process .new .cmdline .to_a
+GC_TONO_EXE_FN = gf_ap $yu_sys.executable
+GC_TONO_OS_ENV_PATHS = ( gf_os_env :SC_PATH ) .split GC_PASA
+GC_TONO_PID = Process.pid
+GC_TONO_SCRIPT_FN = gf_ap $0
+GC_TONO_ST = $yu_datetime .strptime ( $__gau_app_st .strftime '%F %T' ), '%Y-%m-%d %H:%M:%S'
+GC_TONO_START_UP_PN = gf_ap Dir .getwd
+GC_TONO_NM = gf_on GC_TONO_HM, true
 
 CjBigInteger = jf_cls 'java.math.BigInteger'
 CjBoolean    = jf_cls 'java.lang.Boolean'
@@ -260,7 +263,7 @@ GC_TOTAL_MEMORY = $yu_psutil .virtual_memory .total
 GC_HOST_NM = Socket .gethostname
 GC_CUSR = Etc .getlogin  # current user
 
-def gp_qapp; $gu_qapp = QApplication.new []; end
+def gp_qapp_initialize; $gu_qapp = QApplication.new []; end
 
 def gf_process x_pid; $yu_psutil.Process .new x_pid; end
 def gf_os_available_memory; $yu_psutil .virtual_memory .available; end
@@ -270,7 +273,7 @@ GC_LOG = ->() {
   fu_it.level = Logger::DEBUG  # Logger::INFO
   fu_it.formatter = proc do | bx2_severity, bx2_datetime, bx2_progname, bx2_msg |
     bu2_datetime = bx2_datetime.strftime '%y%m%d-%H%M%S'
-    "[#{ '%06d' % GC_APP_PID },#{bx2_severity.chars.first},#{bu2_datetime}] #{bx2_msg}\n"
+    "[#{ '%06d' % GC_TONO_PID },#{bx2_severity.chars.first},#{bu2_datetime}] #{bx2_msg}\n"
   end
   fu_it
 }.()
@@ -296,10 +299,10 @@ def gf_banner x_leading_space = 0, x_margin_inside = 2
   fu_msgs = [
     "#{GC_PYJA_NM} #{GC_PYJA_V2}",
     GC_MILO_NM,
-    GC_APP_NM,
+    GC_TONO_NM,
     '',
     "made by #{GC_PYJA_AU}",
-    "ran on #{ GC_APP_ST .strftime ('%F %T') }",
+    "ran on #{ GC_TONO_ST .strftime ('%F %T') }",
     'released under the GNU AGPL v3, see <http://www.gnu.org/licenses/>.',
   ]
   fu_msl = fu_msgs .map { |bx2_it| bx2_it.size } .max # max string length
@@ -319,10 +322,10 @@ def gf_banner x_leading_space = 0, x_margin_inside = 2
 end
 
 def gp_request_exit x_ec, x_ex = nil
-  gp_log_array ( GC_LOG.method :debug ), '$LOAD_PATH', $: .sort
+  gp_log_array ( GC_LOG.method :debug ), '$LOAD_PATH', $: .sort .map { |x2_pn| gf_to_kms x2_pn }
   gp_log_exception 'Following error occurs !!!', x_ex unless x_ex .nil?
   GC_LOG.info "Exit code => #{x_ec}"
-  GC_LOG.info "Elpased #{ $yu_datetime.now - GC_APP_ST } ..."
+  GC_LOG.info "Elpased #{ $yu_datetime.now - GC_TONO_ST } ..."
   $yu_os ._exit x_ec
 end
 
@@ -358,28 +361,31 @@ private
     raise RuntimeError, 'Pyja create date is not invalid !!!' unless gf_str_is_valid_date GC_PYJA_CD, '%Y.%m.%d'
     GC_LOG .debug "Pyja version => #{GC_PYJA_V2}"
     raise RuntimeError, 'Invalid Pyja version !!!' if GC_PYJA_VR != ( gf_os_env :SC_PYJA_VR )
+    GC_LOG .info  "Kapa home (#{GC_KAPA_HM_SYM}) => #{GC_KAPA_HM}"
     GC_LOG .info  "Pyja root (#{GC_PYJA_RT_SYM}) => #{GC_PYJA_RT}"
     GC_LOG .info  "Pyja home (#{GC_PYJA_HM_SYM}) => #{ gf_to_prs GC_PYJA_HM }"
     GC_LOG .info  "Milo path (#{GC_MILO_PN_SYM}) => #{ gf_to_phs GC_MILO_PN }"
+    GC_LOG .info  "Tono home (#{GC_TONO_HM_SYM}) => #{ gf_to_mps GC_TONO_HM }"
     GC_LOG .info  "Ruby version => #{GC_RUBY_VR}"
     GC_LOG .info  "Java version => #{GC_JAVA_VR}"
     GC_LOG .info  "Groovy version => #{GC_GROOVY_VR}"
     GC_LOG .info  "Python version => #{GC_PYTHON_VR}"
     GC_LOG .info  "PyQt version => #{GC_PYQT_VR}"
-    GC_LOG .debug "Java home => #{GC_JAVA_HM}"
-    GC_LOG .debug "Python home => #{GC_PYTHON_HM}"
+    GC_LOG .debug "Java home => #{ gf_to_kms GC_JAVA_HM }"
+    GC_LOG .debug "Python home => #{ gf_to_kms GC_PYTHON_HM }"
     GC_LOG .debug "Total CPU => #{GC_TOTAL_CPU}"
     GC_LOG .debug "Total memory => #{ CjString .format '%,d', [GC_TOTAL_MEMORY] }"
     GC_LOG .debug "Available memory => #{ CjString .format '%,d', [gf_os_available_memory] }"
     GC_LOG .debug "Computer name => #{GC_HOST_NM}"
     GC_LOG .debug "Current user => #{GC_CUSR}"
-    GC_LOG .debug "Process ID => #{GC_APP_PID}"
-    GC_LOG .debug "Executable file => #{GC_APP_EXE_FN}"
-    GC_LOG .info  "Start up path => #{ gf_to_mps GC_APP_START_UP_PN }"
-    GC_LOG .info  "Script file => #{ gf_to_mps GC_APP_SCRIPT_FN }"
-    gp_log_array  ( GC_LOG .method :debug ), 'Paths', GC_APP_OS_ENV_PATHS
-    gp_log_array  ( GC_LOG .method :debug ), 'Command', GC_APP_CMD
-    gp_log_array  'Arguments', GC_APP_ARGV if GC_APP_ARGV.count > 0
+    GC_LOG .debug "Process ID => #{GC_TONO_PID}"
+    gp_log_array  ( GC_LOG .method :debug ), 'Early jar files', $gu_jar_fn_list .sort .map { |x2_jar_fn| gf_to_kms x2_jar_fn }
+    GC_LOG .debug "Executable file => #{ gf_to_kms GC_TONO_EXE_FN }"
+    GC_LOG .info  "Start up path => #{ gf_to_mps GC_TONO_START_UP_PN }"
+    GC_LOG .info  "Script file => #{ gf_to_ths GC_TONO_SCRIPT_FN }"
+    gp_log_array  ( GC_LOG .method :debug ), 'Paths', GC_TONO_OS_ENV_PATHS
+    gp_log_array  ( GC_LOG .method :debug ), 'Command', GC_TONO_CMD
+    gp_log_array  'Arguments', GC_TONO_ARGV if GC_TONO_ARGV.count > 0
   end
 end
 
@@ -436,7 +442,7 @@ class WMain
   def __wan_init
     def nf2_it
       QMainWindow .new .tap { |x_it|
-        x_it .setWindowTitle GC_APP_NM
+        x_it .setWindowTitle GC_TONO_NM
         yp_sa x_it, 'closeEvent', ->(x_ev_close) { gy_rr {__wan_quit} }
         x_it .setCentralWidget QWidget .new .tap { |x_cw|
           x_cw .setLayout QVBoxLayout .new .tap { |x_lo|
@@ -477,7 +483,7 @@ end
 
 module DBody
   def self.dp_it
-    gp_qapp
+    gp_qapp_initialize
     $gu_qapp .setStyle 'fusion'
     WMain .new
     $gu_qapp .exec_
@@ -486,7 +492,7 @@ end
 
 module OStart
   def self.main
-    gp_set_log_level_to_info
+    # gp_set_log_level_to_info
     DRun .dp_it
   end
 end

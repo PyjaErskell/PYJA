@@ -8,13 +8,15 @@ SET SC_THIS_JN=%~N0
 
 PUSHD "%~DP0"
 CD "%~DP0"
+SET SC_TONO_HM=%CD%
+CD %SC_TONO_HM%\..
 SET SC_MILO_PN=%CD%
 CD "%SC_MILO_PN%\..\..\.."
 SET SC_PYJA_HM=%CD%
-FOR %%F IN (%SC_PYJA_HM%) DO SET SC_PYJA_VR=%%~NXF
 CD "%SC_PYJA_HM%\.."
 SET SC_PYJA_RT=%CD%
 FOR %%F IN (%SC_PYJA_RT%) DO SET SC_PYJA_NM=%%~NXF
+FOR %%F IN (%SC_PYJA_HM%) DO SET SC_PYJA_VR=%%~NXF
 POPD
 
 CALL "%SC_PYJA_HM%\Config\SSet-KAPA.bat"
@@ -46,6 +48,6 @@ ECHO Java maximum heap size option =^> %SC_JAVA_XMX%
 
 ECHO Python home =^> %PYTHONHOME%
 
-"%SC_RUBY_X_FN%" %*
+"%SC_RUBY_X_FN%" "%SC_TONO_HM%\SToa.rb" %*
 
 ENDLOCAL
