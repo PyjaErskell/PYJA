@@ -379,7 +379,7 @@ def gf_banner x_leading_space = 0, x_margin_inside = 2
     GC_TONO_NM,
     '',
     "made by #{GC_PYJA_AU}",
-    "ran on #{ GC_TONO_ST .strftime ('%F %T') }",
+    "ran on #{ GC_TONO_ST .strftime ('%Y-%m-%d %H:%M:%S') }",
     'released under the GNU AGPL v3, see <http://www.gnu.org/licenses/>.',
   ]
   fu_msl = fu_msgs .map { |bx2_it| bx2_it.size } .max # max string length
