@@ -45,6 +45,7 @@ GC_FOSA = File::SEPARATOR      # (fo)lder (s)ep(a)rator
 GC_PASA = File::PATH_SEPARATOR # (pa)th (s)ep(a)rator
 
 def gf_os_env x_it; ENV .fetch x_it.to_s; end
+def gf_os_env_has x_it;  ENV .has_key? x_it.to_s; end
 def gp_set_const x_sym, x_val; Object .const_set x_sym, x_val; end
 def gf_str_is_valid_date x_str, x_format; Date .strptime x_str, x_format; end
 def gf_rm_px x_str, x_px # px : prefix
@@ -124,11 +125,19 @@ end
 require 'rjb'
 
 ->() {
-  pu_jar_fn_lst = [
+  pu_jar_fn_lst = ( ( gf_os_env_has :SC_JAVA_JARS ) ? ( ( gf_os_env :SC_JAVA_JARS ) .split GC_PASA ) : [] ) .each { |bx2_it| gf_jar_fn bx2_it } + [
     ( gf_jar_pj GC_KAPA_HM, '19.01.22', 'Cumuni', 'Groovy', '2.5.5', 'indy', 'groovy-2.5.5-indy.jar' ),
     ( gf_jar_pj GC_KAPA_HM, '19.01.22', 'Cumuni', 'Groovy', '2.5.5', 'indy', 'groovy-jsr223-2.5.5-indy.jar' ),
   ]
-  Rjb::load ( pu_jar_fn_lst .join GC_PASA ), [ gf_os_env(:SC_JAVA_XMX) ]
+  pu_jar_fn_lst .each { |bx2_it| raise RuntimeError, "JAR file not found => #{bx2_it}" unless gf_if bx2_it }
+
+  pu_opts = [ ( gf_os_env :SC_JAVA_XMX ) ]
+  if gf_os_env_has :SC_JAVA_LPS
+    bu2_lps = ( gf_os_env :SC_JAVA_LPS ) .split GC_PASA
+    bu2_lps .each { |bx3_it| raise RuntimeError, "Java library path not found => #{bx3_it}" unless gf_id bx3_it }
+    pu_opts << "-Djava.library.path=#{ bu2_lps .join GC_PASA }"
+  end
+  Rjb::load ( pu_jar_fn_lst .join GC_PASA ), pu_opts
 }.()
 
 $__jau_gr = ( Rjb::import 'javax.script.ScriptEngineManager' ) .new .getEngineByName ('Groovy')
@@ -159,45 +168,9 @@ def jf_is_instance x_cls, x_jo; jf_gf 'gf_is_instance', x_cls, x_jo; end # jo = 
 def jp_add_jar x_jar_fn; jy_gf 'gp_add_jar', [x_jar_fn]; end
 
 [
-  ( gf_jar_pj GC_TONO_HM, 'ecu', 'IRuby.jar' ),
   ( gf_jar_pj GC_KAPA_HM, '19.01.22', 'Cumuni', 'JNA', '5.1.0', 'jna-5.1.0.jar' ),
   ( gf_jar_pj GC_KAPA_HM, '19.01.22', 'Cumuni', 'JNA', '5.1.0', 'jna-platform-5.1.0.jar' ),
 ] .each { |bx2_jar_fn| jp_add_jar bx2_jar_fn }
-
-$__jau_gr .put 'GC_RUBY', ( Rjb::bind (
-  Class.new do
-    def cy_call x_ri, x_yethod_nm, x_args
-      gy_ry x_ri, x_yethod_nm, *x_args
-    end
-  end.new
-), 'IRuby' )
-
-jy_ge <<-__JASH_EOS.unindent
-  Object.metaClass.gy_ry = { final long x_ri, final String x_yethod_nm, final Object... x_args ->
-    GC_RUBY .cy_call ( x_ri, x_yethod_nm, *x_args )
-  }
-__JASH_EOS
-
-jy_ge <<-__JASH_EOS.unindent
-  import javafx.stage.Stage
-  Object.metaClass.gp_xr = { final Closure xp_it -> // JavaF(x) (r)un
-    javafx.application.Platform .runLater { xp_it () }
-  }
-  class __CgFxApp extends javafx.application.Application {
-    private static Closure __casp_start
-    private static long __casl_ri
-    private static String __casl_yethod_nm
-    static void csn_launch ( final Closure xp_start, final long x_ri, final String x_yethod_nm ) {
-      __casp_start = xp_start
-      __casl_ri = x_ri
-      __casl_yethod_nm = x_yethod_nm
-      launch this
-    }
-    void start ( final Stage x_stage ) { gp_xr { __casp_start ( __casl_ri, __casl_yethod_nm, x_stage ) } }
-  }
-  __gap_fx_start = { final long x_ri, final String x_yethod_nm, final Stage x_stage -> gy_ry x_ri, x_yethod_nm, x_stage }
-  gp_fx_start = { final long x_ri, final String x_yethod_nm -> Thread .start { __CgFxApp .csn_launch __gap_fx_start, x_ri, x_yethod_nm } }
-__JASH_EOS
 
 #---------------------------------------------------------------
 # Python (Global)
@@ -211,7 +184,7 @@ def yf_ga x_yo, x_nm; PyCall.builtins .getattr x_yo, x_nm; end
 def yp_sa x_yo, x_nm, x_val; PyCall.builtins .setattr x_yo, x_nm, x_val; end
 def yf_e x_expr, x_globals: nil, x_locals: nil; PyCall::eval x_expr, globals: x_globals, locals: x_locals; end
 def yp_e x_code, x_globals: nil, x_locals: nil; PyCall::exec x_code, globals: x_globals, locals: x_locals; end
-def yp_gco x_yo, x_signal, xy_slot; ( yf_ga x_yo, ( x_signal.is_a? Symbol ) ? x_signal.to_s : x_signal ) .connect xy_slot; end # gco = si(g)nal (c)onnect sl(o)t
+def yp_gco x_yo, x_signal, xy_slot; ( yf_ga x_yo, x_signal.to_s ) .connect xy_slot; end # gco = si(g)nal (c)onnect sl(o)t
 
 yp_e <<-__YASH_EOS.unindent
   import sys
@@ -297,8 +270,8 @@ CjString     = jf_cls 'java.lang.String'
 CjSystem     = jf_cls 'java.lang.System'
 
 CjGroovySystem = jf_cls 'groovy.lang.GroovySystem'
-CjPlatform = jf_cls 'com.sun.jna.Platform'
 CjScriptEngineManager = jf_cls 'javax.script.ScriptEngineManager'
+CjPlatform = jf_cls 'com.sun.jna.Platform'
 
 GC_RUBY_VR   = RUBY_VERSION
 GC_JAVA_VR   = CjSystem .getProperty 'java.version'
@@ -350,7 +323,7 @@ def gf_banner x_leading_space = 0, x_margin_inside = 2
     GC_TONO_NM,
     '',
     "made by #{GC_PYJA_AU}",
-    "ran on #{ GC_TONO_ST .strftime ('%F %T') }",
+    "ran on #{ GC_TONO_ST .strftime ('%Y-%m-%d %H:%M:%S') }",
     'released under the GNU AGPL v3, see <http://www.gnu.org/licenses/>.',
   ]
   fu_msl = fu_msgs .map { |bx2_it| bx2_it.size } .max # max string length
@@ -370,7 +343,7 @@ def gf_banner x_leading_space = 0, x_margin_inside = 2
 end
 
 def gp_request_exit x_ec, x_ex = nil
-  gp_log_array ( GC_LOG.method :debug ), '$LOAD_PATH', $: .sort .map { |x2_pn| gf_to_kms x2_pn }
+  gp_log_array ( GC_LOG.method :debug ), '$LOAD_PATH', $: .map { |x2_pn| gf_to_kms x2_pn } .sort
   gp_log_exception 'Following error occurs !!!', x_ex unless x_ex .nil?
   GC_LOG.info "Exit code => #{x_ec}"
   GC_LOG.info "Elpased #{ $yu_datetime.now - GC_TONO_ST } ..."
@@ -431,6 +404,7 @@ private
     GC_LOG .info  "Pyja home (#{GC_PYJA_HM_SYM}) => #{ gf_to_prs GC_PYJA_HM }"
     GC_LOG .info  "Milo path (#{GC_MILO_PN_SYM}) => #{ gf_to_phs GC_MILO_PN }"
     GC_LOG .info  "Tono home (#{GC_TONO_HM_SYM}) => #{ gf_to_mps GC_TONO_HM }"
+    GC_LOG .info  "Is 64 bit? => #{ CjPlatform .is64Bit }"
     GC_LOG .info  "Ruby version => #{GC_RUBY_VR}"
     GC_LOG .info  "Java version => #{GC_JAVA_VR}"
     GC_LOG .info  "Groovy version => #{GC_GROOVY_VR}"
@@ -444,7 +418,7 @@ private
     GC_LOG .debug "Computer name => #{GC_HOST_NM}"
     GC_LOG .debug "Current user => #{GC_CUSR}"
     GC_LOG .debug "Process ID => #{GC_TONO_PID}"
-    gp_log_array  ( GC_LOG .method :debug ), 'Early jar files', $gu_jar_fn_list .sort .map { |x2_jar_fn| gf_to_kms x2_jar_fn }
+    gp_log_array  ( GC_LOG .method :debug ), 'Early jar files', $gu_jar_fn_list .map { |x2_jar_fn| gf_to_kms x2_jar_fn } .sort
     GC_LOG .debug "Executable file => #{ gf_to_kms GC_TONO_EXE_FN }"
     GC_LOG .info  "Start up path => #{ gf_to_mps GC_TONO_START_UP_PN }"
     GC_LOG .info  "Script file => #{ gf_to_ths GC_TONO_SCRIPT_FN }"
@@ -459,81 +433,112 @@ end
 #---------------------------------------------------------------
 
 require 'gtk3'
+Gtk .init
+
+[
+  ( gf_jar_pj GC_KAPA_HM, '19.01.22', 'Cumuni', 'ICU4J', '63.1', 'icu4j-63_1.jar' ),
+  ( gf_jar_pj GC_KAPA_HM, '19.01.22', 'Cumuni', 'ICU4J', '63.1', 'icu4j-charset-63_1.jar' ),
+  ( gf_jar_pj GC_KAPA_HM, '19.01.22', 'Cumuni', 'ICU4J', '63.1', 'icu4j-localespi-63_1.jar' ),
+] .each { |bx2_jar_fn| jp_add_jar bx2_jar_fn }
+
+class HSpellout
+  attr_reader :hu_it
+  def initialize x_total; @hu_total = x_total; __han_init; end
+  def __han_init
+    nu_cls_rbnf = jf_cls 'com.ibm.icu.text.RuleBasedNumberFormat'
+    @hu_rbnf = nu_cls_rbnf .new nu_cls_rbnf.SPELLOUT
+    @hu_fixed_fnt = QFontDatabase.systemFont QFontDatabase.FixedFont
+    @hu_it = HyQAbstractTableModel .new self
+  end
+  def rowCount x_parent = QModelIndex .new; gy_rr {@hu_total}; end
+  def columnCount x_parent = QModelIndex .new; gy_rr {2}; end
+  def headerData x_column, x_orientation, x_role; gy_rr {
+    if x_role == Qt.DisplayRole and x_orientation == Qt.Horizontal
+      return QVariant .new 'Number' if x_column == 0
+      return QVariant .new 'Spell out' if x_column == 1
+    end
+    QVariant .new
+  } end
+  def data x_index, x_role; gy_rr {
+    return QVariant .new unless x_index .isValid
+    case x_role
+    when Qt.DisplayRole
+      bu2_col = x_index .column
+      bu2_row = x_index .row
+      return QVariant .new CjString .format '%,d', [bu2_row] if bu2_col == 0
+      return QVariant .new @hu_rbnf .format bu2_row if bu2_col == 1
+    when Qt.TextAlignmentRole
+      bu2_col = x_index .column
+      return Qt.AlignRight | Qt.AlignVCenter if bu2_col == 0
+      return Qt.AlignLeft | Qt.AlignVCenter if bu2_col == 1
+    when Qt.FontRole
+      bu2_col = x_index .column
+      return @hu_fixed_fnt if bu2_col == 0
+    end
+    QVariant .new
+  } end
+end
 
 class WMain < CgRi
-  include TjUtil
-  def initialize; super; wn_init; tn_fx_start 'wn_fx_start'; end
-  def wn_init
-    GC_LOG .info 'Initializing ...'
+  def initialize; __wan_init; end
+  def __wan_init
+    @wu_total = ( CjPlatform .is64Bit ) ? 32345678 : 8388605
     @wu_timer = QTimer .new
-    yp_gco @wu_timer, :timeout, ->() { wn_change_font }
+    yp_gco @wu_timer, :timeout, ->() { wn_goto_random_row }
+    def nf2_it
+      QMainWindow .new .tap { |x_it|
+        x_it .setWindowTitle GC_TONO_NM
+        yp_sa x_it, 'closeEvent', ->(x_ev_close) { gy_rr {__wan_quit} }
+        x_it .setCentralWidget QWidget .new .tap { |x_cw|
+          x_cw .setLayout QVBoxLayout .new .tap { |x_lo|
+            @wu_tv = nf2_tv
+            x_lo .addWidget @wu_tv
+          }
+        }
+        x_it .resize 777, 333
+        x_it .show
+        x_it .raise_
+        __wan_move_center x_it
+      }
+    end
+    def nf2_tv
+      QTableView .new .tap { |x_tv|
+        x_tv .verticalHeader .hide
+        x_tv .horizontalHeader .setStretchLastSection true
+        x_tv .setSelectionBehavior QAbstractItemView.SelectRows
+        x_tv .setSelectionMode QAbstractItemView.SingleSelection
+        yp_sa x_tv, 'keyboardSearch', ->(x_search) { gy_rr {} }
+        x_tv .setModel ( HSpellout .new  @wu_total ) .hu_it
+        x_tv .scrollToBottom
+      }
+    end
+    @wu_it = nf2_it
+    @wu_timer .start 1000
   end
-  def wn_fx_start x_stage; gy_rr {
-    GC_LOG .info 'Starting FX ...'
-    @wu_stage = x_stage
-    gp_set_const :CjButton, ( jf_cls 'javafx.scene.control.Button' )
-    gp_set_const :CjFont, ( jf_cls 'javafx.scene.text.Font' )
-    gp_set_const :CjLabel, ( jf_cls 'javafx.scene.control.Label' )
-    gp_set_const :CjPos, ( jf_cls 'javafx.geometry.Pos' )
-    gp_set_const :CjVBox, ( jf_cls 'javafx.scene.layout.VBox' )
-    @wu_fnt_families = CjFont.families
-    GC_LOG .info "Total fonts => #{@wu_fnt_families.size}"
-    @wv_fnt_idx = @wu_fnt_families.size - 1
-    @wv_msg = ''
-    @wu_bn = CjButton .new .tap { |it| tn_fx_set_eh it, 'onAction', 'wn_bn_on_action'}
-    @wu_lb = CjLabel.new
-    @wu_root = CjVBox.new .tap { |it|
-      it .setAlignment CjPos.CENTER
-      it .setSpacing 10
-      it .getChildren .addAll [ @wu_bn, @wu_lb ]
-    }
-    # 1 / 0
-    @wu_stage .tap { |it|
-      it .setTitle GC_TONO_NM
-      it .setWidth 750
-      it .setHeight 290
-      tn_fx_set_eh it, 'onShowing', 'wn_stage_on_showing'
-      tn_fx_set_eh it, 'onShown', 'wn_stage_on_shown'
-      tn_fx_set_eh it, 'onCloseRequest', 'wn_stage_on_close_request'
-      it .setScene ( jf_cls 'javafx.scene.Scene' ) .new @wu_root
-      it .centerOnScreen
-      it .show
-      it .toFront
-    }
-  } end
-  def wn_bn_on_action x_ev; wn_change_font; end
-  def wn_change_font
-    @wv_fnt_idx = 0 if @wv_fnt_idx >= @wu_fnt_families.size
-    nu_fnt_nm = ( @wu_fnt_families .get @wv_fnt_idx ) .toString
-    GC_LOG .info @wv_msg unless @wv_msg == ''
-    nu_nt = "(#{@wv_fnt_idx+1}/#{@wu_fnt_families.size})"
-    @wv_msg = "0^0 #{nu_nt} (#{nu_fnt_nm})"
-    @wu_bn .setText "Say '#{@wv_msg}'"
-    @wu_bn .setStyle "-fx-font-family : '#{nu_fnt_nm}'; -fx-font-size : 27px;"
-    @wu_lb .setText "#{nu_nt} Font name : #{nu_fnt_nm}"
-    @wv_fnt_idx += 1
+  def wn_goto_random_row
+    nu_row = Random .new .rand 1..@wu_total
+    GC_LOG .info "Row => #{ CjString .format '%,d', [nu_row] }"
+    @wu_tv .selectRow nu_row
   end
-  def wn_stage_on_showing x_ev
-    GC_LOG .info 'Stage showing ...'
-    wn_change_font
-  end
-  def wn_stage_on_shown x_ev
-    GC_LOG .info 'Stage shown ...'
-    @wu_scene = @wu_stage .getScene
-    @wu_timer .start 100
-  end
-  def wn_stage_on_close_request x_ev
-    GC_LOG .info 'About to quit ...'
+  def __wan_quit
+    GC_LOG .info  'About to quit ...'
     gp_request_exit GC_EC_SUCCESS
+  end
+  def __wan_move_center x_it
+    nu_cp = QDesktopWidget .new .availableGeometry .center # center point
+    nu_fg = x_it .frameGeometry
+    nu_fg .moveCenter nu_cp
+    x_it .move nu_fg .topLeft
   end
 end
 
+
 module DBody
   def self.dp_it
-    Gtk .init
     gp_qapp_initialize
+    $gu_qapp .setStyle 'fusion'
     pu_o = WMain .new
-    Gtk .main
+    $gu_qapp .exec
   end
 end
 
