@@ -1,0 +1,2 @@
+SET SC_QT_HM=%SC_MSYS2_MINGW_HM%
+SET SC_QM_X_FN=%SC_QT_HM%\bin\qmake.exe
