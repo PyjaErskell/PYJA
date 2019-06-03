@@ -35,7 +35,7 @@ Q_DECLARE_METATYPE(jobject)
 namespace Global {
   const auto GC_QT_VR = QT_VERSION_STR;
 
-  auto gf_qs_to_cs ( const QString & xru_qstr ) { return xru_qstr .toUtf8 () .constData (); } // Qt String to C String
+  auto gf_to_cs ( const QString & xru_qstr ) { return xru_qstr .toUtf8 () .constData (); } // Qt String to C String
 
   template < class T > class CgLazy {
     public:
@@ -146,7 +146,7 @@ namespace Global {
     static const auto ysu_mi = zy ( GetMethodID ( zy ( FindClass ("javax/script/ScriptEngine") ), "eval", "(Ljava/lang/String;)Ljava/lang/Object;" ) );
     return __jay_oy ( * JTC_GR, ysu_mi, jf_ns (xtl_script) );
   }
-  auto jy_ge ( const QString & xru_script ) { return jy_ge ( gf_qs_to_cs (xru_script) ); }
+  auto jy_ge ( const QString & xru_script ) { return jy_ge ( gf_to_cs (xru_script) ); }
   auto jy_gf ( const char * xtl_function_nm, const std ::list <jobject> & xru_args = {} ) { // (g)roovy invoke (f)unction
     static const auto ysu_mi = zy (  GetMethodID ( zy ( FindClass ("javax/script/Invocable") ), "invokeFunction", "(Ljava/lang/String;[Ljava/lang/Object;)Ljava/lang/Object;" ) );
     return __jay_oy ( * JTC_GR, ysu_mi, jf_ns (xtl_function_nm), __jaf_na (xru_args) );
@@ -163,15 +163,15 @@ namespace Global {
   #define JOY jy_oy
   auto jf_to_ths ( const char * xtl_it ) { return __jaf_to_css ( ( jy_gf ( "gf_to_ths", { jf_ns (xtl_it) } ) ) ); }
   auto jf_new ( const jobject x_cls, const std ::list <jobject> & xru_args = {} ) { return JOY ( x_cls, "newInstance", xru_args ); }
-  auto jf_jo_to_css ( const jobject x_jo ) { return __jaf_to_css ( jf_to_s (x_jo) ); } // Java Object to C++ Standard String
-  auto jf_jo_to_cs ( const jobject x_jo ) { return jf_jo_to_css (x_jo) .c_str (); } // Java Object to C String
-  auto jf_jo_to_qs ( const jobject x_jo ) { return QString ::fromUtf8 ( jf_jo_to_cs (x_jo) ); } // Java Object to QString
+  auto jf_to_css ( const jobject x_jo ) { return __jaf_to_css ( jf_to_s (x_jo) ); } // Java Object to C++ Standard String
+  auto jf_to_cs ( const jobject x_jo ) { return jf_to_css (x_jo) .c_str (); } // Java Object to C String
+  auto jf_to_qs ( const jobject x_jo ) { return QString ::fromUtf8 ( jf_to_cs (x_jo) ); } // Java Object to QString
   
   auto jf_ni ( const int x_int ) { return jy_ge ( QString ("new Integer (%1)") .arg ( QString ::number (x_int) ) ); } // Create Java Integer
   auto jf_nl ( const long x_long ) { return jy_ge ( QString ("new Long (%1)") .arg ( QString ::number (x_long) ) ); } // Create Java Long
   auto jf_nd ( const double x_double ) { return jy_ge ( QString ("new Double (%1)") .arg ( QString ::number (x_double) ) ); } // Create Java Double
 
-  #define zf_wai(x_msg) ( std ::string (__PRETTY_FUNCTION__) ) .append (" [") .append ( jf_to_ths (__FILE__) ) .append (":") .append ( jf_jo_to_css ( jf_sf ( "%04d", { jf_ni (__LINE__) } ) ) ) .append ("] ") .append (x_msg) .c_str ()
+  #define zf_wai(x_msg) ( std ::string (__PRETTY_FUNCTION__) ) .append (" [") .append ( jf_to_ths (__FILE__) ) .append (":") .append ( jf_to_css ( jf_sf ( "%04d", { jf_ni (__LINE__) } ) ) ) .append ("] ") .append (x_msg) .c_str ()
 
   #define zf_lazy_cls(x_cls_nm) CgLazy <jobject> ( [] () { return jf_cls (#x_cls_nm); } )
   
@@ -190,17 +190,17 @@ namespace Global {
     const auto fu_it = __jay_oy ( * JTC_GR, ysu_mi, jf_ns (xtl_key) );
     if ( fu_it == NULL ) {
       jp_request_exit ( jy_ge ("GC_EC_ERROR"), { jf_ns (
-        zf_wai ( gf_qs_to_cs ( QString ( "Can't find key => %1" ) .arg (xtl_key) ) ) 
+        zf_wai ( gf_to_cs ( QString ( "Can't find key => %1" ) .arg (xtl_key) ) ) 
       ) } );
     }
     return fu_it;
   }
-  auto jf_gg ( const QString & xru_key ) { return jf_gg ( gf_qs_to_cs (xru_key) ); }
+  auto jf_gg ( const QString & xru_key ) { return jf_gg ( gf_to_cs (xru_key) ); }
   auto jp_gp ( const char * xtl_key, const jobject x_val ) { // (g)roovy put
     static const auto ysu_mi = zy (  GetMethodID ( zy ( FindClass ("javax/script/ScriptEngine") ), "put", "(Ljava/lang/String;Ljava/lang/Object;)V" ) );
     return __jay_oy ( * JTC_GR, ysu_mi, jf_ns (xtl_key), x_val );
   }
-  auto jp_gp ( const QString & xru_key , const jobject x_val ) { jp_gp ( gf_qs_to_cs (xru_key), x_val ); }
+  auto jp_gp ( const QString & xru_key , const jobject x_val ) { jp_gp ( gf_to_cs (xru_key), x_val ); }
 
   void jp_sa ( const jobject x_jo, const char * xtl_a_nm, const jobject x_value ) { jy_gf ( "gp_sa", { x_jo, jf_ns (xtl_a_nm), x_value } ); }
   auto jf_ga ( const jobject x_jo, const char * xtl_a_nm ) { return jy_gf ( "gf_ga", { x_jo, jf_ns (xtl_a_nm) } ); }
@@ -391,21 +391,21 @@ private :
     __watl_pb = new QPushButton ();
 
     connect ( __watl_pb, & QPushButton ::clicked, [&] () { 
-      JC_LOG ::info ( gf_qs_to_cs ( __watl_pb ->text () ) );
+      JC_LOG ::info ( gf_to_cs ( __watl_pb ->text () ) );
       JOY ( wu_atr_integer, "tell", { jf_ns ("LNext"), wl_atr_self } );
     } );
     __watl_pb ->setSizePolicy ( QSizePolicy ::Expanding, QSizePolicy ::Fixed );
     ntl_lo ->addWidget (__watl_pb);
     ntl_cw ->setLayout (ntl_lo);
 
-    setWindowTitle ( jf_jo_to_qs ( jf_gg ("GC_TONO_NM") ) );
+    setWindowTitle ( jf_to_qs ( jf_gg ("GC_TONO_NM") ) );
     setCentralWidget (ntl_cw);
     resize ( 350, 150 );
 
     __watl_timer = new QTimer (this);
     connect ( __watl_timer, & QTimer ::timeout, [&] () { __watl_pb ->click (); } );
   }
-  void __wan_set_pb_text ( jobject xl_cnt ) { __watl_pb ->setText ( jf_jo_to_qs ( jf_sf ( "Ciao, %,d !", { xl_cnt } ) ) ); }
+  void __wan_set_pb_text ( jobject xl_cnt ) { __watl_pb ->setText ( jf_to_qs ( jf_sf ( "Ciao, %,d !", { xl_cnt } ) ) ); }
   void __wan_move_center () {
     const auto nu_cp = QGuiApplication ::primaryScreen () ->geometry () .center (); // center point
     move ( nu_cp .x () - width () / 2, nu_cp .y () - height () / 2 );
