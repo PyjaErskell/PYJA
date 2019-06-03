@@ -1,0 +1,65 @@
+@ECHO OFF
+SETLOCAL
+
+SET PATH=%SystemRoot%\system32
+
+SET SC_THIS_BN=%~NX0
+SET SC_THIS_JN=%~N0
+
+PUSHD "%~DP0"
+CD "%~DP0"
+SET SC_TONO_HM=%CD%
+CD %SC_TONO_HM%\..
+SET SC_MILO_PN=%CD%
+CD "%SC_MILO_PN%\..\..\.."
+SET SC_PYJA_HM=%CD%
+CD "%SC_PYJA_HM%\.."
+SET SC_PYJA_RT=%CD%
+FOR %%F IN (%SC_PYJA_RT%) DO SET SC_PYJA_NM=%%~NXF
+FOR %%F IN (%SC_PYJA_HM%) DO SET SC_PYJA_VR=%%~NXF
+POPD
+
+CALL "%SC_PYJA_HM%\Config\SSet-KAPA.bat"
+CALL "%SC_PYJA_HM%\Config\MSYS2\x64\SSet-MSYS2.bat"
+CALL "%SC_PYJA_HM%\Config\MSYS2\x64\SSet-Python-3.7.2.bat"
+CALL "%SC_PYJA_HM%\Config\MSYS2\x64\SSet-Ruby-2.6.0.bat"
+CALL "%SC_PYJA_HM%\Config\MSYS2\x64\SSet-Qt-5.12.0.bat"
+CALL "%SC_PYJA_HM%\Config\JDK\x64\SSet-JDK-8-212.bat"
+
+SET SC_JAVA_XMX=-Xmx9g
+
+SET JAVA_HOME=%SC_J8_HM%
+SET PYTHONHOME=%SC_PYTHON_HM%
+SET PYTHON=%SC_PYTHON_EXE_FN%
+
+SET SC_MAKE_X_FN=%SC_MSYS2_MINGW_HM%\bin\mingw32-make.exe
+
+SEt SC_INC_PATH=%SC_TONO_HM%\ecu
+SET SC_INC_PATH=%SC_INC_PATH%;%JAVA_HOME%\include
+SET SC_INC_PATH=%SC_INC_PATH%;%JAVA_HOME%\include\win32
+
+SET SC_LIB=%JAVA_HOME%\lib\jvm.lib
+
+SET SC_PATH=%PATH%
+
+ECHO PYJA name =^> %SC_PYJA_NM%
+ECHO PYJA version =^> %SC_PYJA_VR%
+ECHO PYJA root =^> %SC_PYJA_RT%
+ECHO PYJA home =^> %SC_PYJA_HM%
+ECHO MILO path =^> %SC_MILO_PN%
+ECHO TONO home =^> %SC_TONO_HM%
+ECHO KAPA home =^> %SC_KAPA_HM%
+
+ECHO PATH =^> %SC_PATH%
+
+ECHO Java home =^> %JAVA_HOME%
+ECHO Java maximum heap size option =^> %SC_JAVA_XMX%
+
+ECHO Include path =^> %SC_INC_PATH%
+ECHO Lib path =^> %SC_LIB%
+
+ECHO Qt home =^> %SC_QT_HM%
+
+"%SC_RUBY_X_FN%" "%SC_TONO_HM%\%SC_THIS_JN%.rb" %*
+
+ENDLOCAL
