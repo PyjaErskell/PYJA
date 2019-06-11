@@ -187,15 +187,19 @@ CjShort      = jf_cls 'java.lang.Short'
 CjString     = jf_cls 'java.lang.String'
 CjSystem     = jf_cls 'java.lang.System'
 
+CjPlatform = jf_cls 'com.sun.jna.Platform'
+
 GC_RUBY_VR   = RUBY_VERSION
 GC_PYTHON_VR = YG.platform .python_version
 GC_PYQT_VR = YG.QtCore .qVersion
 
 $gu_qapp = YG.QApplication.new []
 
-Signal .trap ('INT') { 
-  jp_request_exit GC_EC_SHUTDOWN, [ 'SIGINT occurred !!!' ]
-}
+if CjPlatform .isMac
+  Signal .trap ('INT') { 
+    jp_request_exit GC_EC_SHUTDOWN, [ 'SIGINT occurred !!!' ]
+  }
+end
 
 def gf_process x_pid; YG.psutil.Process .new x_pid; end
 def gf_os_available_memory; YG.psutil .virtual_memory .available; end

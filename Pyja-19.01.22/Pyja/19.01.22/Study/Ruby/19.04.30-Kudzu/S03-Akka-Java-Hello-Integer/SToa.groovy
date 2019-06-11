@@ -151,6 +151,7 @@ GC_AS = { ->
      loggers = ["akka.event.slf4j.Slf4jLogger"]
      loglevel = "DEBUG"
      logging-filter = "akka.event.slf4j.Slf4jLoggingFilter"
+     log-dead-letters-during-shutdown = off
     }
   '''
   gf_cls ('akka.actor.ActorSystem') .create ( 'GC_AS', fu_cfg )
@@ -252,7 +253,7 @@ gp_request_exit = { x_ec, x_ex = [] ->
   def pp2_exit = {
     switch (x_ec) {
       case GC_EC_NONE : gp_os_exit (GC_EC_ERROR); break
-      case GC_EC_SHUTDOWN : gp_os_exit (GC_EC_ERROR); break
+      case GC_EC_SHUTDOWN : break
       default :
         if ( x_ec < 0 ) gp_os_exit (GC_EC_ERROR)
         else  gp_os_exit (x_ec)
@@ -261,6 +262,10 @@ gp_request_exit = { x_ec, x_ex = [] ->
   }
   gp_before_exit x_ec, x_ex
   pp2_exit ()
+}
+
+if ( CgPlatform .isWindows () ) {
+  addShutdownHook { gp_request_exit ( GC_EC_SHUTDOWN, [ 'Shutdown occurred !!!' ] ) }
 }
 
 gp_sa = { x_jo, String x_a_nm, x_value -> x_jo [x_a_nm] = x_value } // (s)et (a)ttribute

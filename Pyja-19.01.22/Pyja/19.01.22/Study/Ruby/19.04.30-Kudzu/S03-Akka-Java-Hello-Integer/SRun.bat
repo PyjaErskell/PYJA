@@ -20,11 +20,12 @@ FOR %%F IN (%SC_PYJA_HM%) DO SET SC_PYJA_VR=%%~NXF
 POPD
 
 CALL "%SC_PYJA_HM%\Config\SSet-KAPA.bat"
-IF 1==0 (
-  CALL "%SC_TONO_HM%\SSet-x32.bat"
-) ELSE (
-  CALL "%SC_TONO_HM%\SSet-x64.bat"
-)
+CALL "%SC_PYJA_HM%\Config\MSYS2\x64\SSet-MSYS2.bat"
+CALL "%SC_PYJA_HM%\Config\MSYS2\x64\SSet-Python-3.7.2.bat"
+CALL "%SC_PYJA_HM%\Config\MSYS2\x64\SSet-Ruby-2.6.0.bat"
+CALL "%SC_PYJA_HM%\Config\JDK\x64\SSet-JDK-8-212.bat"
+
+SET SC_JAVA_XMX=-Xmx9g
 
 SET JAVA_HOME=%SC_J8_HM%
 SET PYTHONHOME=%SC_PYTHON_HM%
