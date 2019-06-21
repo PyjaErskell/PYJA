@@ -131,19 +131,7 @@ def gp_qr & x_blk; com.trolltech.qt.core.QCoreApplication .invokeLater { gy_br {
 def gf_qg x_n; gy_gf "gf_qg_#{x_n}"; end # x_n <- 0 to 9
 
 def gp_gco x_signal, x_nethod # gco = si(g)nal (c)onnect sl(o)t
-  pu_blk = case x_nethod.arity
-  when 0 then Proc .new { x_nethod .call }
-  when 1 then Proc .new { |bx_1| x_nethod .call bx_1 }
-  when 2 then Proc .new { | bx_1, bx_2 | x_nethod .call bx_1, bx_2 }
-  when 3 then Proc .new { | bx_1, bx_2, bx_3 | x_nethod .call bx_1, bx_2, bx_3 }
-  when 4 then Proc .new { | bx_1, bx_2, bx_3, bx_4 | x_nethod .call bx_1, bx_2, bx_3, bx_4 }
-  when 5 then Proc .new { | bx_1, bx_2, bx_3, bx_4, bx_5 | x_nethod .call bx_1, bx_2, bx_3, bx_4, bx_5 }
-  when 6 then Proc .new { | bx_1, bx_2, bx_3, bx_4, bx_5, bx_6 | x_nethod .call bx_1, bx_2, bx_3, bx_4, bx_5, bx_6 }
-  when 7 then Proc .new { | bx_1, bx_2, bx_3, bx_4, bx_5, bx_6, bx_7 | x_nethod .call bx_1, bx_2, bx_3, bx_4, bx_5, bx_6, bx_7 }
-  when 8 then Proc .new { | bx_1, bx_2, bx_3, bx_4, bx_5, bx_6, bx_7, bx_8 | x_nethod .call bx_1, bx_2, bx_3, bx_4, bx_5, bx_6, bx_7, bx_8 }
-  when 9 then Proc .new { | bx_1, bx_2, bx_3, bx_4, bx_5, bx_6, bx_7, bx_8, bx_9 | x_nethod .call bx_1, bx_2, bx_3, bx_4, bx_5, bx_6, bx_7, bx_8, bx_9 }
-  end
-  pu_slot = gy_gf "gf_qo_#{x_signal.class.name[-1]}", pu_blk
+  pu_slot = gy_gf "gf_qo_#{x_signal.class.name[-1]}", x_nethod .to_proc
   x_signal .connect *pu_slot
 end
 
@@ -222,7 +210,7 @@ class CMain
     @cg_9 .emit 1, 2, 3, 4, 5, 6, 7, 8, 9
   end
   def con_0
-    gp_log_header 'Test signal connect slot', 60
+    gp_log_header 'Test signal connect slot', 50
     GC_LOG .info gf_wai
   end
   def con_1 x_1
@@ -272,7 +260,7 @@ module DBody
 
     pg_1 = gf_qg 1
     gp_gcb pg_1 do |bx_1|;
-      gp_log_header 'Test signal connect ruby block', 60
+      gp_log_header 'Test signal connect ruby block', 50
       GC_LOG .info "#{bx_1} from custom Qt Signal 1"
     end
 
