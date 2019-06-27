@@ -18,7 +18,9 @@ public class ORun extends Application {
   public static Date ol_st = new Date ();
   public static Stage ol_ps;
   public static ScriptEngine ol_gr;
+  public static String ou_gr_fn = System .getenv ("SC_TONO_HM") + File.separator + "SToa.groovy";
   public static ScriptEngine ol_jr;
+  public static String ou_jr_fn = System .getenv ("SC_TONO_HM") + File.separator + "SToa.rb";
   public static String [] ol_args; 
   public static void main ( final String [] x_args ) {
     ol_args = x_args;
@@ -27,23 +29,23 @@ public class ORun extends Application {
   @Override
   public void start ( final Stage x_stage ) throws Exception {
     ol_ps = x_stage;
-    __oan_run_groovy_script ( System .getenv ("SC_TONO_HM") + File.separator + "SToa.groovy" );
-    __oan_run_jruby_script ( System .getenv ("SC_TONO_HM") + File.separator + "SToa.rb" );
+    __oan_run_groovy_script ();
+    __oan_run_jruby_script ();
   }
-  private static void __oan_run_groovy_script ( final String x_fn ) throws Exception {
-    final File nu_fl = new File (x_fn);
-    if ( ! ( nu_fl .exists () && nu_fl .isFile () ) ) { throw new FileNotFoundException ( "Groovy script file not found => " + x_fn ); }
+  private static void __oan_run_groovy_script () throws Exception {
+    final File nu_fl = new File (ou_gr_fn);
+    if ( ! ( nu_fl .exists () && nu_fl .isFile () ) ) { throw new FileNotFoundException ( "Groovy script file not found => " + ou_gr_fn ); }
     ol_gr = new ScriptEngineManager () .getEngineByName ("Groovy");
     if ( ol_gr == null ) { { throw new NullPointerException ( "Groovy script engine not found !!!" ); } }
     ol_gr .eval ( new FileReader (nu_fl) );
   }
-  private static void __oan_run_jruby_script ( final String x_fn ) throws Exception {
+  private static void __oan_run_jruby_script () throws Exception {
     try {
-      final File bu2_fl = new File (x_fn);
-      if ( ! ( bu2_fl .exists () && bu2_fl .isFile () ) ) { throw new FileNotFoundException ( "JRuby script file not found => " + x_fn ); }
+      final File bu2_fl = new File (ou_jr_fn);
+      if ( ! ( bu2_fl .exists () && bu2_fl .isFile () ) ) { throw new FileNotFoundException ( "JRuby script file not found => " + ou_jr_fn ); }
       ol_jr = new ScriptEngineManager () .getEngineByName ("jruby");
       if ( ol_jr == null ) { { throw new NullPointerException ( "JRuby script engine not found !!!" ); } }
-      ( (Invocable) ol_jr ) .invokeFunction ( "require", x_fn );
+      ( (Invocable) ol_jr ) .invokeFunction ( "require", ou_jr_fn );
     } catch ( final Exception bu2_ex ) {
       final Invocable bu2_gi = (Invocable) ol_gr;
       final Object bu2_ex_list = bu2_gi .invokeFunction ( "gf_exception_to_list", new Object [] {bu2_ex} );

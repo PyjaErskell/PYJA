@@ -298,66 +298,27 @@ Object.metaClass.__gaf_joa_to_roa = { Object ... x_joa -> // (j)ava (o)bject (a)
 import com.trolltech.qt.core.QObject
 import org.jruby.RubyProc
 
-class __CgQtSlot0 extends QObject {
-  final private __cap_blk
-  __CgQtSlot0 (x_blk) { __cap_blk = x_blk }
-  void con_it () { gp_qr { __cap_blk .call __gaf_jr_ctx (), __gaf_joa_to_roa () } }
-}
-class __CgQtSlot1 extends QObject {
-  final private __cap_blk
-  __CgQtSlot1 (x_blk) { __cap_blk = x_blk }
-  void con_it (x_1) { gp_qr { __cap_blk .call __gaf_jr_ctx (), __gaf_joa_to_roa (x_1) } }
-}
-class __CgQtSlot2 extends QObject {
-  final private __cap_blk
-  __CgQtSlot2 (x_blk) { __cap_blk = x_blk }
-  void con_it ( x_1, x_2 ) { gp_qr { __cap_blk .call __gaf_jr_ctx (), __gaf_joa_to_roa ( x_1, x_2 ) } }
-}
-class __CgQtSlot3 extends QObject {
-  final private __cap_blk
-  __CgQtSlot3 (x_blk) { __cap_blk = x_blk }
-  void con_it ( x_1, x_2, x_3 ) { gp_qr { __cap_blk .call __gaf_jr_ctx (), __gaf_joa_to_roa ( x_1, x_2, x_3 ) } }
-}
-class __CgQtSlot4 extends QObject {
-  final private __cap_blk
-  __CgQtSlot4 (x_blk) { __cap_blk = x_blk }
-  void con_it ( x_1, x_2, x_3, x_4 ) { gp_qr { __cap_blk .call __gaf_jr_ctx (), __gaf_joa_to_roa ( x_1, x_2, x_3, x_4 ) } }
-}
-class __CgQtSlot5 extends QObject {
-  final private __cap_blk
-  __CgQtSlot5 (x_blk) { __cap_blk = x_blk }
-  void con_it ( x_1, x_2, x_3, x_4, x_5 ) { gp_qr { __cap_blk .call __gaf_jr_ctx (), __gaf_joa_to_roa ( x_1, x_2, x_3, x_4, x_5 ) } }
-}
-class __CgQtSlot6 extends QObject {
-  final private __cap_blk
-  __CgQtSlot6 (x_blk) { __cap_blk = x_blk }
-  void con_it ( x_1, x_2, x_3, x_4, x_5, x_6 ) { gp_qr { __cap_blk .call __gaf_jr_ctx (), __gaf_joa_to_roa ( x_1, x_2, x_3, x_4, x_5, x_6 ) } }
-}
-class __CgQtSlot7 extends QObject {
-  final private __cap_blk
-  __CgQtSlot7 (x_blk) { __cap_blk = x_blk }
-  void con_it ( x_1, x_2, x_3, x_4, x_5, x_6, x_7 ) { gp_qr { __cap_blk .call __gaf_jr_ctx (), __gaf_joa_to_roa ( x_1, x_2, x_3, x_4, x_5, x_6, x_7 ) } }
-}
-class __CgQtSlot8 extends QObject {
-  final private __cap_blk
-  __CgQtSlot8 (x_blk) { __cap_blk = x_blk }
-  void con_it ( x_1, x_2, x_3, x_4, x_5, x_6, x_7, x_8 ) { gp_qr { __cap_blk .call __gaf_jr_ctx (), __gaf_joa_to_roa ( x_1, x_2, x_3, x_4, x_5, x_6, x_7, x_8 ) } }
-}
-class __CgQtSlot9 extends QObject {
-  final private __cap_blk
-  __CgQtSlot9 (x_blk) { __cap_blk = x_blk }
-  void con_it ( x_1, x_2, x_3, x_4, x_5, x_6, x_7, x_8, x_9 ) { gp_qr { __cap_blk .call __gaf_jr_ctx (), __gaf_joa_to_roa ( x_1, x_2, x_3, x_4, x_5, x_6, x_7, x_8, x_9 ) } }
-}
-def gf_qo_0 ( RubyProc x_blk ) { final fu_it = new __CgQtSlot0 (x_blk); [ fu_it, 'con_it()' ] }
-def gf_qo_1 ( RubyProc x_blk ) { final fu_it = new __CgQtSlot1 (x_blk); [ fu_it, 'con_it(Object)' ] }
-def gf_qo_2 ( RubyProc x_blk ) { final fu_it = new __CgQtSlot2 (x_blk); [ fu_it, 'con_it(Object,Object)' ] }
-def gf_qo_3 ( RubyProc x_blk ) { final fu_it = new __CgQtSlot3 (x_blk); [ fu_it, 'con_it(Object,Object,Object)' ] }
-def gf_qo_4 ( RubyProc x_blk ) { final fu_it = new __CgQtSlot4 (x_blk); [ fu_it, 'con_it(Object,Object,Object,Object)' ] }
-def gf_qo_5 ( RubyProc x_blk ) { final fu_it = new __CgQtSlot5 (x_blk); [ fu_it, 'con_it(Object,Object,Object,Object,Object)' ] }
-def gf_qo_6 ( RubyProc x_blk ) { final fu_it = new __CgQtSlot6 (x_blk); [ fu_it, 'con_it(Object,Object,Object,Object,Object,Object)' ] }
-def gf_qo_7 ( RubyProc x_blk ) { final fu_it = new __CgQtSlot7 (x_blk); [ fu_it, 'con_it(Object,Object,Object,Object,Object,Object,Object)' ] }
-def gf_qo_8 ( RubyProc x_blk ) { final fu_it = new __CgQtSlot8 (x_blk); [ fu_it, 'con_it(Object,Object,Object,Object,Object,Object,Object,Object)' ] }
-def gf_qo_9 ( RubyProc x_blk ) { final fu_it = new __CgQtSlot9 (x_blk); [ fu_it, 'con_it(Object,Object,Object,Object,Object,Object,Object,Object,Object)' ] }
+class __CgQtSlot0 extends QObject { def cp_blk; void con_it () { gp_qr { cp_blk .call __gaf_jr_ctx (), __gaf_joa_to_roa () } } }
+class __CgQtSlot1 extends QObject { def cp_blk; void con_it (x_1) { gp_qr { cp_blk .call __gaf_jr_ctx (), __gaf_joa_to_roa (x_1) } } }
+class __CgQtSlot2 extends QObject { def cp_blk; void con_it ( x_1, x_2 ) { gp_qr { cp_blk .call __gaf_jr_ctx (), __gaf_joa_to_roa ( x_1, x_2 ) } } }
+class __CgQtSlot3 extends QObject { def cp_blk; void con_it ( x_1, x_2, x_3 ) { gp_qr { cp_blk .call __gaf_jr_ctx (), __gaf_joa_to_roa ( x_1, x_2, x_3 ) } } }
+class __CgQtSlot4 extends QObject { def cp_blk; void con_it ( x_1, x_2, x_3, x_4 ) { gp_qr { cp_blk .call __gaf_jr_ctx (), __gaf_joa_to_roa ( x_1, x_2, x_3, x_4 ) } } }
+class __CgQtSlot5 extends QObject { def cp_blk; void con_it ( x_1, x_2, x_3, x_4, x_5 ) { gp_qr { cp_blk .call __gaf_jr_ctx (), __gaf_joa_to_roa ( x_1, x_2, x_3, x_4, x_5 ) } } }
+class __CgQtSlot6 extends QObject { def cp_blk; void con_it ( x_1, x_2, x_3, x_4, x_5, x_6 ) { gp_qr { cp_blk .call __gaf_jr_ctx (), __gaf_joa_to_roa ( x_1, x_2, x_3, x_4, x_5, x_6 ) } } }
+class __CgQtSlot7 extends QObject { def cp_blk; void con_it ( x_1, x_2, x_3, x_4, x_5, x_6, x_7 ) { gp_qr { cp_blk .call __gaf_jr_ctx (), __gaf_joa_to_roa ( x_1, x_2, x_3, x_4, x_5, x_6, x_7 ) } } }
+class __CgQtSlot8 extends QObject { def cp_blk; void con_it ( x_1, x_2, x_3, x_4, x_5, x_6, x_7, x_8 ) { gp_qr { cp_blk .call __gaf_jr_ctx (), __gaf_joa_to_roa ( x_1, x_2, x_3, x_4, x_5, x_6, x_7, x_8 ) } } }
+class __CgQtSlot9 extends QObject { def cp_blk; void con_it ( x_1, x_2, x_3, x_4, x_5, x_6, x_7, x_8, x_9 ) { gp_qr { cp_blk .call __gaf_jr_ctx (), __gaf_joa_to_roa ( x_1, x_2, x_3, x_4, x_5, x_6, x_7, x_8, x_9 ) } } }
+
+def gf_qo_0 ( RubyProc x_blk ) { final fu_it = new __CgQtSlot0 ( cp_blk : x_blk ); [ fu_it, 'con_it()' ] }
+def gf_qo_1 ( RubyProc x_blk ) { final fu_it = new __CgQtSlot1 ( cp_blk : x_blk ); [ fu_it, 'con_it(Object)' ] }
+def gf_qo_2 ( RubyProc x_blk ) { final fu_it = new __CgQtSlot2 ( cp_blk : x_blk ); [ fu_it, 'con_it(Object,Object)' ] }
+def gf_qo_3 ( RubyProc x_blk ) { final fu_it = new __CgQtSlot3 ( cp_blk : x_blk ); [ fu_it, 'con_it(Object,Object,Object)' ] }
+def gf_qo_4 ( RubyProc x_blk ) { final fu_it = new __CgQtSlot4 ( cp_blk : x_blk ); [ fu_it, 'con_it(Object,Object,Object,Object)' ] }
+def gf_qo_5 ( RubyProc x_blk ) { final fu_it = new __CgQtSlot5 ( cp_blk : x_blk ); [ fu_it, 'con_it(Object,Object,Object,Object,Object)' ] }
+def gf_qo_6 ( RubyProc x_blk ) { final fu_it = new __CgQtSlot6 ( cp_blk : x_blk ); [ fu_it, 'con_it(Object,Object,Object,Object,Object,Object)' ] }
+def gf_qo_7 ( RubyProc x_blk ) { final fu_it = new __CgQtSlot7 ( cp_blk : x_blk ); [ fu_it, 'con_it(Object,Object,Object,Object,Object,Object,Object)' ] }
+def gf_qo_8 ( RubyProc x_blk ) { final fu_it = new __CgQtSlot8 ( cp_blk : x_blk ); [ fu_it, 'con_it(Object,Object,Object,Object,Object,Object,Object,Object)' ] }
+def gf_qo_9 ( RubyProc x_blk ) { final fu_it = new __CgQtSlot9 ( cp_blk : x_blk ); [ fu_it, 'con_it(Object,Object,Object,Object,Object,Object,Object,Object,Object)' ] }
 
 class __CgQtSignal0 extends QObject { final Signal0 cg_it = new Signal0 (this) }
 class __CgQtSignal1 extends QObject { final Signal1 <Object> cg_it = new Signal1 <Object> (this) }
