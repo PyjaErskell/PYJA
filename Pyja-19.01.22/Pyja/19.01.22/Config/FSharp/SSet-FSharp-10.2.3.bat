@@ -1,0 +1,3 @@
+SET SC_FSHARP_HM=%SC_KAPA_HM%\19.01.22\Cumuni\FSharp\Compiler\Tools\10.2.3
+SET SC_FSI_X_FN=%SC_FSHARP_HM%\fsi.exe
+SET SC_FSC_X_FN=%SC_FSHARP_HM%\fsc.exe
