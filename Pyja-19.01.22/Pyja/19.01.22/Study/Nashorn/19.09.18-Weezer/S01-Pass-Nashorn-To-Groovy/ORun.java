@@ -19,9 +19,9 @@ public class ORun {
   public static String [] ol_args; 
   public static void main ( final String [] x_args ) throws Exception {
     ol_args = x_args;
-    __oan_run_nash_script ();
+    __oan_run_nashorn_script ();
   }
-  private static void __oan_run_nash_script () throws Exception {
+  private static void __oan_run_nashorn_script () throws Exception {
     final File nu_fl = new File (ou_gr_fn);
     if ( ! ( nu_fl .exists () && nu_fl .isFile () ) ) { throw new FileNotFoundException ( "Nashorn script file not found => " + ou_gr_fn ); }
     ol_gr = new ScriptEngineManager () .getEngineByName ("Nashorn");
