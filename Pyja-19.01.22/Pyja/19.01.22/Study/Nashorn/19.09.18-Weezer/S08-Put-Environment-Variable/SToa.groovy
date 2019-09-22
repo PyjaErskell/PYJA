@@ -12,6 +12,38 @@ gf_cls = { x_cls_nm -> Class .forName (x_cls_nm) } // find class from string
 CgFilenameUtils = gf_cls 'org.apache.commons.io.FilenameUtils'
 CgPlatform = gf_cls 'com.sun.jna.Platform'
 CgSimpleDateFormat = java.text.SimpleDateFormat
+
+class DgEnv {
+  private static interface CWinLibC extends com.sun.jna.Library {
+    public int _putenv ( String x_name )
+    public String getenv ( String x_name )
+  }
+  private static interface CUnixLibC extends com.sun.jna.Library {
+    public int setenv ( String x_name, String x_value, int x_overwrite )
+    public int unsetenv ( String x_name )
+    public String getenv ( String x_name )
+  }
+  private static def __dau_lib = com.sun.jna.Native .loadLibrary ( com.sun.jna.Platform.C_LIBRARY_NAME, com.sun.jna.Platform .isWindows () ? CWinLibC.class : CUnixLibC.class )
+  public static int df_set_env ( String x_name, String x_value, int x_overwrite = 1 ) {
+    return ( __dau_lib instanceof CWinLibC
+      ? ( (CWinLibC) __dau_lib ) ._putenv ( x_name + '=' + x_value )
+      : ( (CUnixLibC) __dau_lib ) .setenv ( x_name, x_value, x_overwrite )
+    )
+  }
+  public static int df_unset_env ( String x_name ) {
+    return ( __dau_lib instanceof CWinLibC
+      ? ( (CWinLibC) __dau_lib ) ._putenv ( x_name + '=' )
+      : ( (CUnixLibC) __dau_lib ) .unsetenv (x_name) )
+  }
+  public static String df_get_env ( String x_name ) {
+    return ( __dau_lib instanceof CWinLibC
+      ? ( (CWinLibC) __dau_lib ) .getenv (x_name)
+      : ( (CUnixLibC) __dau_lib ) .getenv (x_name) )
+  }
+  public static int df_set ( String x_name, String x_value, int x_overwrite = 1 ) { df_set_env x_name, x_value, x_overwrite }
+  public static String df_get ( String x_name ) { df_get_env x_name }
+}
+
 gf_bn = { x_fn -> new File (x_fn) .name } // (b)ase (n)ame
 gf_jn = { x_fn -> final fu_bn = gf_bn (x_fn); fu_bn .substring ( 0, fu_bn .lastIndexOf ('.') ) } // (j)ust (n)ame without extension
 gf_xn = { x_fn -> CgFilenameUtils .getExtension x_fn } // e(x)tension (n)ame
@@ -96,43 +128,15 @@ gf_file_text = { x_fn, x_encoding = 'UTF-8' ->
   new File (x_fn) .getText (x_encoding)
 }
 GC_MILO_PN = gf_ap gf_pj ( GC_TONO_HM, '..' )
-class DgEnv {
-  private static interface CWinLibC extends com.sun.jna.Library {
-    public int _putenv ( String x_name )
-    public String getenv ( String x_name )
-  }
-  private static interface CUnixLibC extends com.sun.jna.Library {
-    public int setenv ( String x_name, String x_value, int x_overwrite )
-    public int unsetenv ( String x_name )
-    public String getenv ( String x_name )
-  }
-  private static def __dau_lib = com.sun.jna.Native .loadLibrary ( com.sun.jna.Platform.C_LIBRARY_NAME, com.sun.jna.Platform .isWindows () ? CWinLibC.class : CUnixLibC.class )
-  public static int df_set_env ( String x_name, String x_value, int x_overwrite = 1) {
-    return ( __dau_lib instanceof CWinLibC
-      ? ( (CWinLibC) __dau_lib ) ._putenv ( x_name + '=' + x_value )
-      : ( (CUnixLibC) __dau_lib ) .setenv ( x_name, x_value, x_overwrite )
-    )
-  }
-  public static int df_unset_env ( String x_name ) {
-    return ( __dau_lib instanceof CWinLibC
-      ? ( (CWinLibC) __dau_lib ) ._putenv ( x_name + '=' )
-      : ( (CUnixLibC) __dau_lib ) .unsetenv (x_name) )
-  }
-  public static String df_get_env ( String x_name ) {
-    return ( __dau_lib instanceof CWinLibC
-      ? ( (CWinLibC) __dau_lib ) .getenv (x_name)
-      : ( (CUnixLibC) __dau_lib ) .getenv (x_name) )
-  }
-}
 gf_new_python = {
   fp2_prepare_4_windows = {
     final fu2_python_hm = gf_pj GC_KAPA_HM, '19.01.22', 'Vindue', 'x64', 'Anaconda', '5.1.0'
-    DgEnv .df_set_env 'PATH', ( [ fu2_python_hm,  gf_pj ( gf_os_env('SystemRoot'), 'System32' ) ] .join (GC_PASA) )
-    DgEnv .df_set_env 'PYTHONHOME', fu2_python_hm
-    DgEnv .df_set_env 'QT_QPA_PLATFORM_PLUGIN_PATH', gf_pj ( fu2_python_hm, 'Library', 'plugins' )
-    DgEnv .df_set_env 'QT_AUTO_SCREEN_SCALE_FACTOR', '1'
+    DgEnv .df_set 'PATH', ( [ fu2_python_hm,  gf_pj ( gf_os_env('SystemRoot'), 'System32' ) ] .join (GC_PASA) )
+    DgEnv .df_set 'PYTHONHOME', fu2_python_hm
+    DgEnv .df_set 'QT_QPA_PLATFORM_PLUGIN_PATH', gf_pj ( fu2_python_hm, 'Library', 'plugins' )
+    DgEnv .df_set 'QT_AUTO_SCREEN_SCALE_FACTOR', '1'
 
-    DgEnv .df_set_env 'PYTHONPATH', [
+    DgEnv .df_set 'PYTHONPATH', [
       '',
       fu2_python_hm,
       gf_pj ( fu2_python_hm, 'DLLs' ) ,
