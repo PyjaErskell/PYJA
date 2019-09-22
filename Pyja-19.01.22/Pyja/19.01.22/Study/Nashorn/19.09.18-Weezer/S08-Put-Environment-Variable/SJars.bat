@@ -1,0 +1,3 @@
+SET SC_JARS=%SC_TONO_HM%\ecu\ORun.jar
+
+SET SC_JAVA_LPS=%SC_TONO_HM%\ecu
