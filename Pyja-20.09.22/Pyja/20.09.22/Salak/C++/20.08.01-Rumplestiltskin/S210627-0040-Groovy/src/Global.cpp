@@ -1,11 +1,6 @@
 #include <Global.hpp>
 
 namespace Global {
-  gmp_br (
-    std::cout << "Original source path (" << DgOriginalSorcePath::du_sym << ") => " << DgOriginalSorcePath::du_it << std::endl;
-    std::cout << "Entering " << GMX_FILE << " ..." << std::endl;
-  );
-
   QApplication * gtl_qapp;
 
   std::string gf_os_env ( const std::string & xru_key ) {
@@ -164,5 +159,8 @@ __gap_export_all_to_object_meta_class ()
     const auto fu_it = jmf_com ( __JAC_GR, fsu_mid_se_get, jmf_nsu (xtl_key) );
     if ( fu_it == NULL ) { throw std::runtime_error ( "Groovy get : can't find key => " + std::string (xtl_key) + " !!!" );  }
     return fu_it;
+  }
+  void __gap_210627_0059 (void) {
+    std::cout << "Original source path (" << DgOriginalSorcePath::du_sym << ") => " << DgOriginalSorcePath::du_it << std::endl;
   }
 }

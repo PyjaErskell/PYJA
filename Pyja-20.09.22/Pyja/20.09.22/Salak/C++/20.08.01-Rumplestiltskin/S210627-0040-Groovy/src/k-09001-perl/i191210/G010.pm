@@ -187,7 +187,7 @@ Log::Log4perl -> easy_init (
   {
     level => $DEBUG,
     file  => 'STDOUT',
-    layout => '[%06P,%p{1},%d{yyMMDD-HHmmss}] %m%n',
+    layout => '[%06P,%p{1},%d{yyMMdd-HHmmss}] %m%n',
   },
 );
 

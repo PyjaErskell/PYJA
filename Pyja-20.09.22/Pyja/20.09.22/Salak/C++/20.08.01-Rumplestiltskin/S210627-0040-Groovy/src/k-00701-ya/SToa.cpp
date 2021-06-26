@@ -1,9 +1,8 @@
-#include <Global.hpp>
+#include <Global.cpp>
 
 using namespace Global;
 
 gmp_br (
-  std::cout << "Entering " << GMX_FILE << " ..." << std::endl;
   jf_gr_e ( R"PASH_EOS(
 //---------------------------------------------------------------
 // Your Source
@@ -40,7 +39,7 @@ private :
     ntl_lo -> addWidget (__watl_lw);
     ntl_cw -> setLayout (ntl_lo);
     setCentralWidget (ntl_cw);
-    resize ( 700, 330 );
+    resize ( 830, 390 );
     show ();
     raise ();
     __wan_center_on_screen ();
@@ -88,6 +87,7 @@ private :
 
 #include "SToa.moc"
 
+
 void sp_body (void) {
   gp_set_app_font ( gf_os_env ("SC_APP_FONT_FN") .c_str () );
   new WMain ();
@@ -99,6 +99,8 @@ void sp_main (void) {
 }
 
 int main ( int xl_argc, char ** xtl_argv ) {
+  __gap_210627_0059 ();
+  std::cout << "Entering " << GMX_FILE << " ..." << std::endl;
   std::cout << "Starting " << Q_FUNC_INFO << " ..." << std::endl;
   gtl_qapp = new QApplication ( xl_argc, xtl_argv );
   sp_main ();

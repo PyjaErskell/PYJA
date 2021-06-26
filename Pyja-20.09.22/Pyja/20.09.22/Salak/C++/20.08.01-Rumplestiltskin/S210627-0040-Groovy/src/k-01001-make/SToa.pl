@@ -39,7 +39,6 @@ sub sp_body {
   my @pu_v_paths = ( $pu_src_pn, $pu_cpp_src_pn );
   my @pu_sources = (
     "DgOriginalSorcePath.cpp",
-    "Global.cpp",
     gf_bn ($pu_src_fn),
   );
   write_file $pu_pro_fn, <<~PASH_EOS;
