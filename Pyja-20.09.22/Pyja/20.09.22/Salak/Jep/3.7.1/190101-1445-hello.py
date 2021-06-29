@@ -1,3 +1,4 @@
+import sys
 import jep
 import platform
 from java.lang import System
@@ -11,6 +12,7 @@ def gf_2ja ( * x_args ) : # to (j)ava (a)rray
   for bu2_it in x_args : fu_al .add (bu2_it)
   return fu_al .toArray ()
 
-print ( 'Java version (자바 버전) => ' + System .getProperty ("java.version") )
+print ( "Python's sys.argv => " + repr (sys.argv) )
 System.out .printf ( 'Python version (파이썬 버전) => %s\n', gf_2ja ( platform .python_version () ) )
+print ( 'Java version (자바 버전) => ' + System .getProperty ("java.version") )
 System.out .println ( "Hello Python (안녕 파이썬) !!!" )
